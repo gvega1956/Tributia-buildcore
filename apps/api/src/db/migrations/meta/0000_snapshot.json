@@ -1,0 +1,30 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "id": "0000_tenancy",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "tenant": {
+      "name": "tenant",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "nombre": { "name": "nombre", "type": "varchar(300)", "notNull": true },
+        "slug": { "name": "slug", "type": "varchar(100)", "notNull": true },
+        "activo": { "name": "activo", "type": "boolean", "notNull": true, "default": true },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "notNull": true },
+        "created_by": { "name": "created_by", "type": "uuid", "notNull": true },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "notNull": true },
+        "updated_by": { "name": "updated_by", "type": "uuid", "notNull": true }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "_meta": { "schemas": {}, "tables": {}, "columns": {} }
+}

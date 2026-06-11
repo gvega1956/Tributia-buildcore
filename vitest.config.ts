@@ -5,6 +5,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['packages/*/src/**/*.spec.ts', 'apps/*/src/**/*.spec.ts'],
+    exclude: ['**/*.integration.spec.ts', '**/node_modules/**', '**/dist/**'],
     coverage: {
       reporter: ['text', 'lcov'],
       include: ['packages/*/src/**/*.ts', 'apps/*/src/**/*.ts'],

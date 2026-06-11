@@ -13,3 +13,6 @@ export interface SoftDelete {
 export interface TenantScoped {
   tenantId: string;
 }
+
+/** UUID v7 reservado para registros creados por el sistema (seeds, migraciones). */
+export const SYSTEM_USER_ID = '00000000-0000-7000-0000-000000000000';

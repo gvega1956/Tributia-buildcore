@@ -1,3 +1,3 @@
-// Drizzle schema — se pobla sesión a sesión
-// Por ahora solo re-exporta los módulos de esquema que se vayan creando
-export {};
+// Schema agregado para drizzle-kit y el motor de consultas.
+// Cada dominio tendrá su propio archivo en schema/<dominio>/.
+export * from './core/tenant.js';

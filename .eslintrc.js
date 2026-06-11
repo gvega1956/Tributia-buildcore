@@ -90,7 +90,7 @@ module.exports = {
     },
     {
       // API config files outside the build tsconfig
-      files: ['apps/api/drizzle.config.ts'],
+      files: ['apps/api/drizzle.config.ts', 'apps/api/vitest-integration.config.ts'],
       parserOptions: {
         project: ['./apps/api/tsconfig.node.json'],
         tsconfigRootDir: __dirname,
