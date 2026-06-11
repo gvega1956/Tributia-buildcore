@@ -1,0 +1,28 @@
+{
+  "name": "tributia-buildcore",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @tributia/api dev",
+    "build": "pnpm -r build",
+    "lint": "eslint . --ext .ts --max-warnings 0",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:migrate": "pnpm --filter @tributia/api db:migrate",
+    "db:studio": "pnpm --filter @tributia/api db:studio"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@nestjs/core", "esbuild"]
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}
