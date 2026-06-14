@@ -1,2 +1,2 @@
 // @tributia/proyectos — proyecto, EDT, partidas, APU, presupuesto
-export {};
+export * from './proyecto.types.js';

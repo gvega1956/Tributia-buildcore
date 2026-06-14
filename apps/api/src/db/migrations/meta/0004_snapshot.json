@@ -1,0 +1,344 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "id": "0004_proyecciones",
+  "prevId": "0003_ledger",
+  "tables": {
+    "tenant": {
+      "name": "tenant", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "nombre": { "name": "nombre", "type": "varchar(200)", "primaryKey": false, "notNull": true },
+        "slug": { "name": "slug", "type": "varchar(50)", "primaryKey": false, "notNull": true, "isUnique": true, "uniqueName": "tenant_slug_unique", "nullsNotDistinct": false },
+        "activo": { "name": "activo", "type": "boolean", "primaryKey": false, "notNull": true, "default": true },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by": { "name": "created_by", "type": "uuid", "primaryKey": false, "notNull": true },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by": { "name": "updated_by", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": { "tenant_slug_unique": { "name": "tenant_slug_unique", "nullsNotDistinct": false, "columns": ["slug"] } },
+      "checkConstraints": {}
+    },
+    "empresa": {
+      "name": "empresa", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "nombre": { "name": "nombre", "type": "varchar(200)", "primaryKey": false, "notNull": true },
+        "rnc": { "name": "rnc", "type": "varchar(9)", "primaryKey": false, "notNull": false },
+        "activo": { "name": "activo", "type": "boolean", "primaryKey": false, "notNull": true, "default": true },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by": { "name": "created_by", "type": "uuid", "primaryKey": false, "notNull": true },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by": { "name": "updated_by", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": { "empresa_tenant_id_idx": { "name": "empresa_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} } },
+      "foreignKeys": { "empresa_tenant_id_tenant_id_fk": { "name": "empresa_tenant_id_tenant_id_fk", "tableFrom": "empresa", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" } },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "sucursal": {
+      "name": "sucursal", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "empresa_id": { "name": "empresa_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "nombre": { "name": "nombre", "type": "varchar(200)", "primaryKey": false, "notNull": true },
+        "direccion": { "name": "direccion", "type": "text", "primaryKey": false, "notNull": false },
+        "activo": { "name": "activo", "type": "boolean", "primaryKey": false, "notNull": true, "default": true },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by": { "name": "created_by", "type": "uuid", "primaryKey": false, "notNull": true },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by": { "name": "updated_by", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": { "sucursal_tenant_id_idx": { "name": "sucursal_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} } },
+      "foreignKeys": {
+        "sucursal_tenant_id_tenant_id_fk": { "name": "sucursal_tenant_id_tenant_id_fk", "tableFrom": "sucursal", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "sucursal_empresa_id_empresa_id_fk": { "name": "sucursal_empresa_id_empresa_id_fk", "tableFrom": "sucursal", "tableTo": "empresa", "columnsFrom": ["empresa_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "centro_costo": {
+      "name": "centro_costo", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "empresa_id": { "name": "empresa_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "codigo": { "name": "codigo", "type": "varchar(50)", "primaryKey": false, "notNull": true },
+        "nombre": { "name": "nombre", "type": "varchar(200)", "primaryKey": false, "notNull": true },
+        "tipo": { "name": "tipo", "type": "varchar(20)", "primaryKey": false, "notNull": true },
+        "activo": { "name": "activo", "type": "boolean", "primaryKey": false, "notNull": true, "default": true },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by": { "name": "created_by", "type": "uuid", "primaryKey": false, "notNull": true },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by": { "name": "updated_by", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": {
+        "centro_costo_tenant_id_idx": { "name": "centro_costo_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} },
+        "centro_costo_tenant_codigo_idx": { "name": "centro_costo_tenant_codigo_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }, { "expression": "empresa_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }, { "expression": "codigo", "isExpression": false, "asc": true, "nulls": "last", "opclass": "text_ops" }], "isUnique": true, "concurrently": false, "method": "btree", "with": {} }
+      },
+      "foreignKeys": {
+        "centro_costo_tenant_id_tenant_id_fk": { "name": "centro_costo_tenant_id_tenant_id_fk", "tableFrom": "centro_costo", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "centro_costo_empresa_id_empresa_id_fk": { "name": "centro_costo_empresa_id_empresa_id_fk", "tableFrom": "centro_costo", "tableTo": "empresa", "columnsFrom": ["empresa_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": { "centro_costo_tipo_check": { "name": "centro_costo_tipo_check", "value": "\"centro_costo\".\"tipo\" in ('PROYECTO', 'ADMINISTRATIVO')" } }
+    },
+    "usuario": {
+      "name": "usuario", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "email": { "name": "email", "type": "varchar(254)", "primaryKey": false, "notNull": true },
+        "password_hash": { "name": "password_hash", "type": "text", "primaryKey": false, "notNull": true },
+        "nombre": { "name": "nombre", "type": "varchar(100)", "primaryKey": false, "notNull": true },
+        "apellido": { "name": "apellido", "type": "varchar(100)", "primaryKey": false, "notNull": true },
+        "activo": { "name": "activo", "type": "boolean", "primaryKey": false, "notNull": true, "default": true },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by": { "name": "created_by", "type": "uuid", "primaryKey": false, "notNull": true },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by": { "name": "updated_by", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": { "usuario_tenant_id_idx": { "name": "usuario_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} } },
+      "foreignKeys": { "usuario_tenant_id_tenant_id_fk": { "name": "usuario_tenant_id_tenant_id_fk", "tableFrom": "usuario", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" } },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": { "usuario_email_tenant_unique": { "name": "usuario_email_tenant_unique", "nullsNotDistinct": false, "columns": ["email", "tenant_id"] } },
+      "checkConstraints": {}
+    },
+    "rol": {
+      "name": "rol", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "nombre": { "name": "nombre", "type": "varchar(100)", "primaryKey": false, "notNull": true },
+        "descripcion": { "name": "descripcion", "type": "text", "primaryKey": false, "notNull": false },
+        "es_sistema": { "name": "es_sistema", "type": "boolean", "primaryKey": false, "notNull": true, "default": false },
+        "activo": { "name": "activo", "type": "boolean", "primaryKey": false, "notNull": true, "default": true },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by": { "name": "created_by", "type": "uuid", "primaryKey": false, "notNull": true },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by": { "name": "updated_by", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": { "rol_tenant_id_idx": { "name": "rol_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} } },
+      "foreignKeys": { "rol_tenant_id_tenant_id_fk": { "name": "rol_tenant_id_tenant_id_fk", "tableFrom": "rol", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" } },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": { "rol_nombre_tenant_unique": { "name": "rol_nombre_tenant_unique", "nullsNotDistinct": false, "columns": ["nombre", "tenant_id"] } },
+      "checkConstraints": {}
+    },
+    "rol_permiso": {
+      "name": "rol_permiso", "schema": "",
+      "columns": {
+        "rol_id": { "name": "rol_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "permiso": { "name": "permiso", "type": "varchar(100)", "primaryKey": false, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": { "rol_permiso_tenant_id_idx": { "name": "rol_permiso_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} } },
+      "foreignKeys": {
+        "rol_permiso_rol_id_rol_id_fk": { "name": "rol_permiso_rol_id_rol_id_fk", "tableFrom": "rol_permiso", "tableTo": "rol", "columnsFrom": ["rol_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "rol_permiso_tenant_id_tenant_id_fk": { "name": "rol_permiso_tenant_id_tenant_id_fk", "tableFrom": "rol_permiso", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": { "rol_permiso_pk": { "name": "rol_permiso_pk", "columns": ["rol_id", "permiso"] } },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "usuario_rol_empresa": {
+      "name": "usuario_rol_empresa", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "usuario_id": { "name": "usuario_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "empresa_id": { "name": "empresa_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "rol_id": { "name": "rol_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by": { "name": "created_by", "type": "uuid", "primaryKey": false, "notNull": true },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by": { "name": "updated_by", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": { "ure_tenant_id_idx": { "name": "ure_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} } },
+      "foreignKeys": {
+        "ure_tenant_id_fk": { "name": "ure_tenant_id_fk", "tableFrom": "usuario_rol_empresa", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "ure_usuario_id_fk": { "name": "ure_usuario_id_fk", "tableFrom": "usuario_rol_empresa", "tableTo": "usuario", "columnsFrom": ["usuario_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "ure_empresa_id_fk": { "name": "ure_empresa_id_fk", "tableFrom": "usuario_rol_empresa", "tableTo": "empresa", "columnsFrom": ["empresa_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "ure_rol_id_fk": { "name": "ure_rol_id_fk", "tableFrom": "usuario_rol_empresa", "tableTo": "rol", "columnsFrom": ["rol_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": { "ure_usuario_empresa_unique": { "name": "ure_usuario_empresa_unique", "nullsNotDistinct": false, "columns": ["usuario_id", "empresa_id"] } },
+      "checkConstraints": {}
+    },
+    "usuario_rol_proyecto": {
+      "name": "usuario_rol_proyecto", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "usuario_id": { "name": "usuario_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "proyecto_id": { "name": "proyecto_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "rol_id": { "name": "rol_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by": { "name": "created_by", "type": "uuid", "primaryKey": false, "notNull": true },
+        "updated_at": { "name": "updated_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by": { "name": "updated_by", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": { "urp_tenant_id_idx": { "name": "urp_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} } },
+      "foreignKeys": {
+        "urp_tenant_id_fk": { "name": "urp_tenant_id_fk", "tableFrom": "usuario_rol_proyecto", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "urp_usuario_id_fk": { "name": "urp_usuario_id_fk", "tableFrom": "usuario_rol_proyecto", "tableTo": "usuario", "columnsFrom": ["usuario_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "urp_rol_id_fk": { "name": "urp_rol_id_fk", "tableFrom": "usuario_rol_proyecto", "tableTo": "rol", "columnsFrom": ["rol_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": { "urp_usuario_proyecto_unique": { "name": "urp_usuario_proyecto_unique", "nullsNotDistinct": false, "columns": ["usuario_id", "proyecto_id"] } },
+      "checkConstraints": {}
+    },
+    "refresh_token": {
+      "name": "refresh_token", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "usuario_id": { "name": "usuario_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "token_hash": { "name": "token_hash", "type": "text", "primaryKey": false, "notNull": true, "isUnique": true, "uniqueName": "refresh_token_token_hash_unique", "nullsNotDistinct": false },
+        "expires_at": { "name": "expires_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true },
+        "revocado": { "name": "revocado", "type": "boolean", "primaryKey": false, "notNull": true, "default": false },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by": { "name": "created_by", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": {
+        "refresh_token_tenant_id_idx": { "name": "refresh_token_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} },
+        "refresh_token_usuario_id_idx": { "name": "refresh_token_usuario_id_idx", "columns": [{ "expression": "usuario_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} }
+      },
+      "foreignKeys": {
+        "rt_tenant_id_fk": { "name": "rt_tenant_id_fk", "tableFrom": "refresh_token", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "rt_usuario_id_fk": { "name": "rt_usuario_id_fk", "tableFrom": "refresh_token", "tableTo": "usuario", "columnsFrom": ["usuario_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": { "refresh_token_token_hash_unique": { "name": "refresh_token_token_hash_unique", "nullsNotDistinct": false, "columns": ["token_hash"] } },
+      "checkConstraints": {}
+    },
+    "audit_log": {
+      "name": "audit_log", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": false },
+        "tabla_nombre": { "name": "tabla_nombre", "type": "varchar(100)", "primaryKey": false, "notNull": true },
+        "registro_id": { "name": "registro_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "operacion": { "name": "operacion", "type": "varchar(10)", "primaryKey": false, "notNull": true },
+        "usuario_id": { "name": "usuario_id", "type": "uuid", "primaryKey": false, "notNull": false },
+        "ip_address": { "name": "ip_address", "type": "varchar(45)", "primaryKey": false, "notNull": false },
+        "user_agent": { "name": "user_agent", "type": "text", "primaryKey": false, "notNull": false },
+        "datos_anteriores": { "name": "datos_anteriores", "type": "jsonb", "primaryKey": false, "notNull": false },
+        "datos_nuevos": { "name": "datos_nuevos", "type": "jsonb", "primaryKey": false, "notNull": false },
+        "diff": { "name": "diff", "type": "jsonb", "primaryKey": false, "notNull": false },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" }
+      },
+      "indexes": {
+        "audit_log_tenant_id_idx": { "name": "audit_log_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} },
+        "audit_log_tabla_registro_idx": { "name": "audit_log_tabla_registro_idx", "columns": [{ "expression": "tabla_nombre", "isExpression": false, "asc": true, "nulls": "last", "opclass": "text_ops" }, { "expression": "registro_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} },
+        "audit_log_usuario_id_idx": { "name": "audit_log_usuario_id_idx", "columns": [{ "expression": "usuario_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} },
+        "audit_log_created_at_idx": { "name": "audit_log_created_at_idx", "columns": [{ "expression": "created_at", "isExpression": false, "asc": false, "nulls": "last", "opclass": "timestamptz_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} }
+      },
+      "foreignKeys": {
+        "audit_log_tenant_id_tenant_id_fk": { "name": "audit_log_tenant_id_tenant_id_fk", "tableFrom": "audit_log", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": { "audit_log_operacion_check": { "name": "audit_log_operacion_check", "value": "\"audit_log\".\"operacion\" in ('INSERT', 'UPDATE', 'DELETE')" } }
+    },
+    "evento_operativo": {
+      "name": "evento_operativo", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "empresa_id": { "name": "empresa_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "proyecto_id": { "name": "proyecto_id", "type": "uuid", "primaryKey": false, "notNull": false },
+        "centro_costo_id": { "name": "centro_costo_id", "type": "uuid", "primaryKey": false, "notNull": false },
+        "tipo_evento": { "name": "tipo_evento", "type": "varchar(50)", "primaryKey": false, "notNull": true },
+        "ocurrido_en": { "name": "ocurrido_en", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "usuario_id": { "name": "usuario_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "payload": { "name": "payload", "type": "jsonb", "primaryKey": false, "notNull": true },
+        "referencia_id": { "name": "referencia_id", "type": "uuid", "primaryKey": false, "notNull": false },
+        "referencia_tabla": { "name": "referencia_tabla", "type": "varchar(100)", "primaryKey": false, "notNull": false },
+        "idempotency_key": { "name": "idempotency_key", "type": "varchar(255)", "primaryKey": false, "notNull": true },
+        "estado": { "name": "estado", "type": "varchar(20)", "primaryKey": false, "notNull": true, "default": "'registrado'" },
+        "evento_reversa_id": { "name": "evento_reversa_id", "type": "uuid", "primaryKey": false, "notNull": false },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by": { "name": "created_by", "type": "uuid", "primaryKey": false, "notNull": true }
+      },
+      "indexes": {
+        "evento_tenant_id_idx": { "name": "evento_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} },
+        "evento_tipo_estado_idx": { "name": "evento_tipo_estado_idx", "columns": [{ "expression": "tipo_evento", "isExpression": false, "asc": true, "nulls": "last", "opclass": "text_ops" }, { "expression": "estado", "isExpression": false, "asc": true, "nulls": "last", "opclass": "text_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} },
+        "evento_ocurrido_en_idx": { "name": "evento_ocurrido_en_idx", "columns": [{ "expression": "ocurrido_en", "isExpression": false, "asc": false, "nulls": "last", "opclass": "timestamptz_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} },
+        "evento_proyecto_id_idx": { "name": "evento_proyecto_id_idx", "columns": [{ "expression": "proyecto_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} },
+        "evento_idempotency_key_unique": { "name": "evento_idempotency_key_unique", "columns": [{ "expression": "idempotency_key", "isExpression": false, "asc": true, "nulls": "last", "opclass": "text_ops" }], "isUnique": true, "concurrently": false, "method": "btree", "with": {} }
+      },
+      "foreignKeys": {
+        "evento_tenant_id_tenant_id_fk": { "name": "evento_tenant_id_tenant_id_fk", "tableFrom": "evento_operativo", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "evento_empresa_id_empresa_id_fk": { "name": "evento_empresa_id_empresa_id_fk", "tableFrom": "evento_operativo", "tableTo": "empresa", "columnsFrom": ["empresa_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "evento_centro_costo_id_centro_costo_id_fk": { "name": "evento_centro_costo_id_centro_costo_id_fk", "tableFrom": "evento_operativo", "tableTo": "centro_costo", "columnsFrom": ["centro_costo_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "evento_evento_reversa_id_evento_operativo_id_fk": { "name": "evento_evento_reversa_id_evento_operativo_id_fk", "tableFrom": "evento_operativo", "tableTo": "evento_operativo", "columnsFrom": ["evento_reversa_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "evento_tipo_evento_check": { "name": "evento_tipo_evento_check", "value": "\"evento_operativo\".\"tipo_evento\" in ('recepcion_material','consumo_material','transferencia_almacen','avance_partida','hora_equipo','hora_personal','recepcion_factura_proveedor','emision_factura_cliente','pago_emitido','cobro_recibido','avance_subcontrato','retencion_aplicada','combustible_cargado','mantenimiento_ejecutado','orden_cambio_aprobada','ajuste_inventario','evento_reversa')" },
+        "evento_estado_check": { "name": "evento_estado_check", "value": "\"evento_operativo\".\"estado\" in ('registrado','validado','contabilizado','reversado')" },
+        "evento_imputacion_check": { "name": "evento_imputacion_check", "value": "\"evento_operativo\".\"proyecto_id\" IS NOT NULL OR \"evento_operativo\".\"centro_costo_id\" IS NOT NULL" }
+      }
+    },
+    "outbox": {
+      "name": "outbox", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "evento_id": { "name": "evento_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "handler_nombre": { "name": "handler_nombre", "type": "varchar(100)", "primaryKey": false, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "payload": { "name": "payload", "type": "jsonb", "primaryKey": false, "notNull": true },
+        "estado": { "name": "estado", "type": "varchar(20)", "primaryKey": false, "notNull": true, "default": "'pendiente'" },
+        "intentos": { "name": "intentos", "type": "integer", "primaryKey": false, "notNull": true, "default": 0 },
+        "max_intentos": { "name": "max_intentos", "type": "integer", "primaryKey": false, "notNull": true, "default": 5 },
+        "proximo_intento_en": { "name": "proximo_intento_en", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "error_ultimo": { "name": "error_ultimo", "type": "text", "primaryKey": false, "notNull": false },
+        "created_at": { "name": "created_at", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "procesado_en": { "name": "procesado_en", "type": "timestamp with time zone", "primaryKey": false, "notNull": false }
+      },
+      "indexes": {
+        "outbox_estado_proximo_idx": { "name": "outbox_estado_proximo_idx", "columns": [{ "expression": "estado", "isExpression": false, "asc": true, "nulls": "last", "opclass": "text_ops" }, { "expression": "proximo_intento_en", "isExpression": false, "asc": true, "nulls": "last", "opclass": "timestamptz_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} },
+        "outbox_tenant_id_idx": { "name": "outbox_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} }
+      },
+      "foreignKeys": {
+        "outbox_evento_id_evento_operativo_id_fk": { "name": "outbox_evento_id_evento_operativo_id_fk", "tableFrom": "outbox", "tableTo": "evento_operativo", "columnsFrom": ["evento_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "outbox_tenant_id_tenant_id_fk": { "name": "outbox_tenant_id_tenant_id_fk", "tableFrom": "outbox", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": { "outbox_evento_handler_unique": { "name": "outbox_evento_handler_unique", "nullsNotDistinct": false, "columns": ["evento_id", "handler_nombre"] } },
+      "checkConstraints": { "outbox_estado_check": { "name": "outbox_estado_check", "value": "\"outbox\".\"estado\" IN ('pendiente','procesando','completado','fallido')" } }
+    },
+    "proyeccion_ledger_stats": {
+      "name": "proyeccion_ledger_stats", "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true },
+        "tenant_id": { "name": "tenant_id", "type": "uuid", "primaryKey": false, "notNull": true },
+        "tipo_evento": { "name": "tipo_evento", "type": "varchar(50)", "primaryKey": false, "notNull": true },
+        "total_eventos": { "name": "total_eventos", "type": "integer", "primaryKey": false, "notNull": true, "default": 0 },
+        "ultima_actualizacion": { "name": "ultima_actualizacion", "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" }
+      },
+      "indexes": {
+        "stats_tenant_id_idx": { "name": "stats_tenant_id_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last", "opclass": "uuid_ops" }], "isUnique": false, "concurrently": false, "method": "btree", "with": {} }
+      },
+      "foreignKeys": {
+        "stats_tenant_id_tenant_id_fk": { "name": "stats_tenant_id_tenant_id_fk", "tableFrom": "proyeccion_ledger_stats", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": { "stats_tenant_tipo_unique": { "name": "stats_tenant_tipo_unique", "nullsNotDistinct": false, "columns": ["tenant_id", "tipo_evento"] } },
+      "checkConstraints": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "_meta": { "schemas": {}, "tables": {}, "columns": {} }
+}

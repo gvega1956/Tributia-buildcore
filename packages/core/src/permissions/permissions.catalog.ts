@@ -45,6 +45,29 @@ export const PERMISSIONS = {
   NOMINA_WRITE: 'nomina:write',
   NOMINA_APPROVE: 'nomina:approve',
 
+  // Flujos de aprobación
+  FLUJO_LEER: 'flujo:leer',
+  FLUJO_APROBAR: 'flujo:aprobar',
+  FLUJO_ADMIN: 'flujo:admin',
+
+  // Documental
+  DOCUMENTO_READ: 'documento:read',
+  DOCUMENTO_WRITE: 'documento:write',
+
+  // Notificaciones
+  NOTIFICACION_READ: 'notificacion:read',
+
+  // Catálogos maestros
+  TERCERO_READ: 'tercero:read',
+  TERCERO_WRITE: 'tercero:write',
+  UNIDAD_MEDIDA_READ: 'unidad_medida:read',
+  UNIDAD_MEDIDA_WRITE: 'unidad_medida:write',
+  INSUMO_READ: 'insumo:read',
+  INSUMO_WRITE: 'insumo:write',
+  EQUIPO_CATALOGO_READ: 'equipo_catalogo:read',
+  EQUIPO_CATALOGO_WRITE: 'equipo_catalogo:write',
+  CATALOGO_DGII_READ: 'catalogo_dgii:read',
+
   // Reportes / BI
   REPORTE_FINANCIERO: 'reporte:financiero',
   REPORTE_EJECUTIVO: 'reporte:ejecutivo',

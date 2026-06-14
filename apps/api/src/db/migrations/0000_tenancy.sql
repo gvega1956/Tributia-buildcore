@@ -21,8 +21,9 @@ CREATE TABLE tenant (
   updated_by   UUID         NOT NULL
 );
 
--- tributia_app puede operar sobre tenant (necesita leerlo para resolver el tenant del request)
-GRANT SELECT, INSERT, UPDATE, DELETE ON tenant TO tributia_app;
+-- tributia_app solo puede leer tenant (sin RLS: SELECT es suficiente para resolver el slug).
+-- INSERT/UPDATE/DELETE sobre tenant son operaciones de administración del sistema, no del app.
+GRANT SELECT ON tenant TO tributia_app;
 
 -- ─── empresa ─────────────────────────────────────────────────────────────────
 CREATE TABLE empresa (
@@ -93,3 +94,26 @@ CREATE POLICY tenant_isolation ON centro_costo
   WITH CHECK (tenant_id = app_tenant_id());
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON centro_costo TO tributia_app;
+
+-- ─── updated_at automático ────────────────────────────────────────────────────
+-- Trigger que mantiene updated_at sincronizado sin requerir que el código
+-- de aplicación lo recuerde en cada UPDATE.
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_updated_at
+  BEFORE UPDATE ON empresa
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER set_updated_at
+  BEFORE UPDATE ON sucursal
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER set_updated_at
+  BEFORE UPDATE ON centro_costo
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();

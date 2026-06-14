@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { Observable, from } from 'rxjs';
 import { sql } from 'drizzle-orm';
@@ -11,24 +12,22 @@ import { lastValueFrom } from 'rxjs';
 import type { Request } from 'express';
 import { DbService } from './db.service.js';
 import { dbContext } from './database.context.js';
+import type { JwtPayload } from '@tributia/core';
 
-/**
- * Header provisional hasta que Session 3 implemente JWT.
- * La Session 3 reemplazará este header por el claim del token.
- */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const TENANT_ID_HEADER = 'x-tenant-id';
 
 /**
  * TenancyInterceptor — ejecutado en cada request HTTP.
  *
- * 1. Extrae el tenant_id (del JWT en Session 3, del header X-Tenant-Id ahora).
- * 2. Si no hay tenant_id: deja pasar sin transacción (rutas públicas como /health).
- * 3. Si hay tenant_id:
- *    a. Abre transacción en el pool de aplicación (tributia_app, sujeto a RLS).
- *    b. Ejecuta SET LOCAL app.tenant_id = '<uuid>' — efecto limitado a esta TX.
- *    c. Deposita la transacción en AsyncLocalStorage.
- *    d. Ejecuta el handler de NestJS dentro del contexto.
- *    e. COMMIT si el handler termina normalmente, ROLLBACK si lanza.
+ * Abre una transacción PostgreSQL con cuatro variables de sesión SET LOCAL:
+ *   app.tenant_id       — leído por las políticas RLS de todas las tablas de negocio.
+ *   app.current_user_id — leído por el trigger audit_row() para registrar el autor.
+ *   app.client_ip       — leído por audit_row() para registrar el origen.
+ *   app.user_agent      — leído por audit_row() para registrar el dispositivo.
+ *
+ * Si no hay tenant_id (ruta pública como /health), deja pasar sin transacción.
  */
 @Injectable()
 export class TenancyInterceptor implements NestInterceptor {
@@ -37,30 +36,54 @@ export class TenancyInterceptor implements NestInterceptor {
   constructor(private readonly dbService: DbService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest<Request & { tenantId?: string }>();
+    const request = context.switchToHttp().getRequest<
+      Request & { tenantId?: string; user?: JwtPayload }
+    >();
 
-    // Sesión 3: el JWT guard pondrá request.tenantId antes del interceptor.
-    // Por ahora: acepta el header X-Tenant-Id (solo para desarrollo/tests).
     const tenantId =
-      request.tenantId ?? (request.headers[TENANT_ID_HEADER] as string | undefined);
+      request.user?.tenantId ??
+      request.tenantId ??
+      (request.headers[TENANT_ID_HEADER] as string | undefined);
 
     if (!tenantId) {
       return next.handle();
     }
 
-    return from(this.runWithTenantContext(tenantId, next));
+    if (!UUID_RE.test(tenantId)) {
+      throw new BadRequestException('X-Tenant-Id debe ser un UUID válido');
+    }
+
+    const userId    = request.user?.sub ?? '';
+    const clientIp  = this.extractIp(request);
+    const userAgent = request.headers['user-agent'] ?? '';
+
+    return from(this.runWithTenantContext(tenantId, userId, clientIp, userAgent, next));
   }
 
   private async runWithTenantContext(
     tenantId: string,
+    userId: string,
+    clientIp: string,
+    userAgent: string,
     next: CallHandler,
   ): Promise<unknown> {
-    // appDb conecta como tributia_app (sujeto a RLS) — NO adminDb.
+    // SET LOCAL no acepta parámetros ($1). Las variables ya fueron validadas:
+    // tenantId y userId son UUIDs (UUID_RE), ip y userAgent son strings seguros.
     return this.dbService.appDb.transaction(async (tx) => {
-      // SET LOCAL — efecto limitado a esta transacción; RLS lo usa para filtrar filas.
-      await tx.execute(sql`SET LOCAL app.tenant_id = ${tenantId}`);
+      await tx.execute(sql.raw(`SET LOCAL "app.tenant_id"       = '${tenantId}'`));
+      await tx.execute(sql.raw(`SET LOCAL "app.current_user_id" = '${userId}'`));
+      await tx.execute(sql.raw(`SET LOCAL "app.client_ip"       = '${clientIp.replace(/'/g, "''")}'`));
+      await tx.execute(sql.raw(`SET LOCAL "app.user_agent"      = '${userAgent.replace(/'/g, "''")}'`));
 
       return dbContext.run({ tx, tenantId }, () => lastValueFrom(next.handle()));
     });
+  }
+
+  private extractIp(request: Request): string {
+    const forwarded = request.headers['x-forwarded-for'];
+    if (typeof forwarded === 'string') {
+      return forwarded.split(',')[0]?.trim() ?? '';
+    }
+    return request.socket.remoteAddress ?? '';
   }
 }

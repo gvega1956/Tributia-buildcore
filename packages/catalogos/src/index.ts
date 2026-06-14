@@ -1,2 +1,4 @@
-// @tributia/catalogos — terceros, insumos, equipos, planes de cuenta plantilla
-export {};
+export * from './tercero.types.js';
+export * from './insumo.types.js';
+export * from './equipo-catalogo.types.js';
+export * from './dgii.types.js';

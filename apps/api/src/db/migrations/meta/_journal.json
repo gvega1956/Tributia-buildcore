@@ -8,6 +8,76 @@
       "when": 1749600000000,
       "tag": "0000_tenancy",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749686400000,
+      "tag": "0001_identidad",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749772800000,
+      "tag": "0002_auditoria",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749859200000,
+      "tag": "0003_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1749945600000,
+      "tag": "0004_proyecciones",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1750032000000,
+      "tag": "0005_contabilidad",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1750118400000,
+      "tag": "0006_catalogos",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1750204800000,
+      "tag": "0007_workflow",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1750291200000,
+      "tag": "0008_documental_notificaciones",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1750377600000,
+      "tag": "0009_capa0_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1750464000000,
+      "tag": "0010_fix_audit_log_privileges",
+      "breakpoints": true
     }
   ]
 }

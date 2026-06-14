@@ -1,0 +1,103 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "id": "0008_documental_notificaciones",
+  "prevId": "0007_workflow",
+  "tables": {
+    "archivo": {
+      "name": "archivo", "schema": "",
+      "columns": {
+        "id":                    { "name": "id",                    "type": "uuid",                       "primaryKey": true,  "notNull": true },
+        "tenant_id":             { "name": "tenant_id",             "type": "uuid",                       "primaryKey": false, "notNull": true },
+        "nombre":                { "name": "nombre",                "type": "varchar(500)",                "primaryKey": false, "notNull": true },
+        "descripcion":           { "name": "descripcion",           "type": "text",                       "primaryKey": false, "notNull": false },
+        "entidad_tipo":          { "name": "entidad_tipo",          "type": "varchar(100)",                "primaryKey": false, "notNull": true },
+        "entidad_id":            { "name": "entidad_id",            "type": "uuid",                       "primaryKey": false, "notNull": true },
+        "categoria":             { "name": "categoria",             "type": "varchar(50)",                 "primaryKey": false, "notNull": true, "default": "'OTRO'" },
+        "fecha_vencimiento":     { "name": "fecha_vencimiento",     "type": "date",                       "primaryKey": false, "notNull": false },
+        "alerta_dias_antes":     { "name": "alerta_dias_antes",     "type": "integer",                    "primaryKey": false, "notNull": false },
+        "ultima_alerta_enviada": { "name": "ultima_alerta_enviada", "type": "date",                       "primaryKey": false, "notNull": false },
+        "version_actual":        { "name": "version_actual",        "type": "integer",                    "primaryKey": false, "notNull": true, "default": 1 },
+        "storage_key":           { "name": "storage_key",           "type": "text",                       "primaryKey": false, "notNull": true },
+        "content_type":          { "name": "content_type",          "type": "varchar(200)",                "primaryKey": false, "notNull": true },
+        "tamano_bytes_actual":   { "name": "tamano_bytes_actual",   "type": "bigint",                     "primaryKey": false, "notNull": true },
+        "activo":                { "name": "activo",                "type": "boolean",                    "primaryKey": false, "notNull": true, "default": true },
+        "created_at":            { "name": "created_at",            "type": "timestamp with time zone",   "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by":            { "name": "created_by",            "type": "uuid",                       "primaryKey": false, "notNull": true },
+        "updated_at":            { "name": "updated_at",            "type": "timestamp with time zone",   "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by":            { "name": "updated_by",            "type": "uuid",                       "primaryKey": false, "notNull": true }
+      },
+      "indexes": {
+        "archivo_tenant_idx":      { "name": "archivo_tenant_idx",      "columns": [{ "expression": "tenant_id",   "isExpression": false, "asc": true, "nulls": "last" }], "isUnique": false },
+        "archivo_entidad_idx":     { "name": "archivo_entidad_idx",     "columns": [{ "expression": "tenant_id",   "isExpression": false, "asc": true, "nulls": "last" }, { "expression": "entidad_tipo", "isExpression": false, "asc": true, "nulls": "last" }, { "expression": "entidad_id", "isExpression": false, "asc": true, "nulls": "last" }], "isUnique": false },
+        "archivo_vencimiento_idx": { "name": "archivo_vencimiento_idx", "columns": [{ "expression": "tenant_id",   "isExpression": false, "asc": true, "nulls": "last" }, { "expression": "fecha_vencimiento", "isExpression": false, "asc": true, "nulls": "last" }], "isUnique": false }
+      },
+      "foreignKeys": { "archivo_tenant_id_fk": { "name": "archivo_tenant_id_fk", "tableFrom": "archivo", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" } },
+      "compositePrimaryKeys": {}, "uniqueConstraints": {},
+      "checkConstraints": { "archivo_categoria_check": { "name": "archivo_categoria_check", "value": "categoria IN ('CONTRATO','POLIZA','FIANZA','PLANO','FOTO','FACTURA','CERTIFICACION','OTRO')" } }
+    },
+    "version_archivo": {
+      "name": "version_archivo", "schema": "",
+      "columns": {
+        "id":               { "name": "id",               "type": "uuid",                     "primaryKey": true,  "notNull": true },
+        "tenant_id":        { "name": "tenant_id",        "type": "uuid",                     "primaryKey": false, "notNull": true },
+        "archivo_id":       { "name": "archivo_id",       "type": "uuid",                     "primaryKey": false, "notNull": true },
+        "numero_version":   { "name": "numero_version",   "type": "integer",                  "primaryKey": false, "notNull": true },
+        "storage_key":      { "name": "storage_key",      "type": "text",                     "primaryKey": false, "notNull": true },
+        "content_type":     { "name": "content_type",     "type": "varchar(200)",              "primaryKey": false, "notNull": true },
+        "tamano_bytes":     { "name": "tamano_bytes",     "type": "bigint",                   "primaryKey": false, "notNull": true },
+        "checksum_sha256":  { "name": "checksum_sha256",  "type": "varchar(64)",               "primaryKey": false, "notNull": false },
+        "nota":             { "name": "nota",             "type": "text",                     "primaryKey": false, "notNull": false },
+        "created_at":       { "name": "created_at",       "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by":       { "name": "created_by",       "type": "uuid",                     "primaryKey": false, "notNull": true },
+        "updated_at":       { "name": "updated_at",       "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by":       { "name": "updated_by",       "type": "uuid",                     "primaryKey": false, "notNull": true }
+      },
+      "indexes": {
+        "version_archivo_archivo_idx":        { "name": "version_archivo_archivo_idx",        "columns": [{ "expression": "archivo_id", "isExpression": false, "asc": true, "nulls": "last" }], "isUnique": false },
+        "version_archivo_tenant_idx":         { "name": "version_archivo_tenant_idx",         "columns": [{ "expression": "tenant_id",  "isExpression": false, "asc": true, "nulls": "last" }], "isUnique": false },
+        "version_archivo_unique_version_idx": { "name": "version_archivo_unique_version_idx", "columns": [{ "expression": "archivo_id", "isExpression": false, "asc": true, "nulls": "last" }, { "expression": "numero_version", "isExpression": false, "asc": true, "nulls": "last" }], "isUnique": true }
+      },
+      "foreignKeys": {
+        "version_archivo_tenant_id_fk":  { "name": "version_archivo_tenant_id_fk",  "tableFrom": "version_archivo", "tableTo": "tenant",  "columnsFrom": ["tenant_id"],  "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" },
+        "version_archivo_archivo_id_fk": { "name": "version_archivo_archivo_id_fk", "tableFrom": "version_archivo", "tableTo": "archivo", "columnsFrom": ["archivo_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": { "version_archivo_unique_version": { "name": "version_archivo_unique_version", "columns": ["archivo_id", "numero_version"] } },
+      "checkConstraints": {}
+    },
+    "notificacion": {
+      "name": "notificacion", "schema": "",
+      "columns": {
+        "id":               { "name": "id",               "type": "uuid",                     "primaryKey": true,  "notNull": true },
+        "tenant_id":        { "name": "tenant_id",        "type": "uuid",                     "primaryKey": false, "notNull": true },
+        "usuario_id":       { "name": "usuario_id",       "type": "uuid",                     "primaryKey": false, "notNull": true },
+        "tipo":             { "name": "tipo",             "type": "varchar(50)",               "primaryKey": false, "notNull": true },
+        "canal":            { "name": "canal",            "type": "varchar(20)",               "primaryKey": false, "notNull": true, "default": "'IN_APP'" },
+        "asunto":           { "name": "asunto",           "type": "varchar(500)",              "primaryKey": false, "notNull": true },
+        "cuerpo":           { "name": "cuerpo",           "type": "text",                     "primaryKey": false, "notNull": true },
+        "referencia_tipo":  { "name": "referencia_tipo",  "type": "varchar(100)",              "primaryKey": false, "notNull": false },
+        "referencia_id":    { "name": "referencia_id",    "type": "uuid",                     "primaryKey": false, "notNull": false },
+        "leida":            { "name": "leida",            "type": "boolean",                  "primaryKey": false, "notNull": true, "default": false },
+        "enviada_en":       { "name": "enviada_en",       "type": "timestamp with time zone", "primaryKey": false, "notNull": false },
+        "leida_en":         { "name": "leida_en",         "type": "timestamp with time zone", "primaryKey": false, "notNull": false },
+        "created_at":       { "name": "created_at",       "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "created_by":       { "name": "created_by",       "type": "uuid",                     "primaryKey": false, "notNull": true },
+        "updated_at":       { "name": "updated_at",       "type": "timestamp with time zone", "primaryKey": false, "notNull": true, "default": "now()" },
+        "updated_by":       { "name": "updated_by",       "type": "uuid",                     "primaryKey": false, "notNull": true }
+      },
+      "indexes": {
+        "notificacion_usuario_idx": { "name": "notificacion_usuario_idx", "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last" }, { "expression": "usuario_id", "isExpression": false, "asc": true, "nulls": "last" }, { "expression": "leida", "isExpression": false, "asc": true, "nulls": "last" }], "isUnique": false },
+        "notificacion_tenant_idx":  { "name": "notificacion_tenant_idx",  "columns": [{ "expression": "tenant_id", "isExpression": false, "asc": true, "nulls": "last" }], "isUnique": false }
+      },
+      "foreignKeys": { "notificacion_tenant_id_fk": { "name": "notificacion_tenant_id_fk", "tableFrom": "notificacion", "tableTo": "tenant", "columnsFrom": ["tenant_id"], "columnsTo": ["id"], "onDelete": "no action", "onUpdate": "no action" } },
+      "compositePrimaryKeys": {}, "uniqueConstraints": {},
+      "checkConstraints": {
+        "notificacion_tipo_check":  { "name": "notificacion_tipo_check",  "value": "tipo IN ('VENCIMIENTO_DOCUMENTO','FLUJO_APROBACION','SISTEMA')" },
+        "notificacion_canal_check": { "name": "notificacion_canal_check", "value": "canal IN ('IN_APP','EMAIL','WHATSAPP')" }
+      }
+    }
+  },
+  "enums": {}, "schemas": {}, "sequences": {},
+  "_meta": { "schemas": {}, "tables": {}, "columns": {} }
+}

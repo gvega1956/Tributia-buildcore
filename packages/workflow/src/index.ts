@@ -1,2 +1,1 @@
-// @tributia/workflow — motor de flujos de aprobación
-export {};
+export * from './flujo.types.js';

@@ -5,8 +5,9 @@
     "rootDir": "./src",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "module": "CommonJS",
-    "moduleResolution": "Node"
+    "module": "node16",
+    "moduleResolution": "node16",
+    "types": ["node", "multer"]
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules", "**/*.spec.ts"]

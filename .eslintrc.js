@@ -81,6 +81,20 @@ module.exports = {
       },
     },
     {
+      // Integration specs usan supertest + NestJS getHttpServer() que retornan `any` por diseño
+      files: ['apps/api/src/**/*.integration.spec.ts'],
+      parserOptions: {
+        project: ['./apps/api/tsconfig.spec.json'],
+        tsconfigRootDir: __dirname,
+      },
+      rules: {
+        '@typescript-eslint/no-unsafe-argument': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-call': 'off',
+      },
+    },
+    {
       // Root-level config files
       files: ['vitest.config.ts'],
       parserOptions: {
@@ -94,6 +108,23 @@ module.exports = {
       parserOptions: {
         project: ['./apps/api/tsconfig.node.json'],
         tsconfigRootDir: __dirname,
+      },
+    },
+    {
+      // Scripts y seeds del directorio tools/ — sin typed linting (son scripts manuales, no producción)
+      files: ['tools/**/*.ts'],
+      parserOptions: {
+        project: ['./tools/tsconfig.json'],
+        tsconfigRootDir: __dirname,
+      },
+      rules: {
+        // Desactivar reglas que requieren type-checking completo (los módulos externos no están en scope)
+        '@typescript-eslint/no-unsafe-call': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off',
+        '@typescript-eslint/no-unsafe-argument': 'off',
+        '@typescript-eslint/no-unsafe-return': 'off',
+        '@typescript-eslint/no-floating-promises': 'off',
       },
     },
   ],

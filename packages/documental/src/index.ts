@@ -1,2 +1,1 @@
-// @tributia/documental — archivos, versiones, vencimientos
-export {};
+export * from './documental.types.js';

@@ -7,7 +7,7 @@
     "build": "pnpm -r build",
     "lint": "eslint . --ext .ts --max-warnings 0",
     "typecheck": "pnpm -r typecheck",
-    "test": "vitest run",
+    "test": "pnpm -r build && vitest run",
     "test:watch": "vitest",
     "db:migrate": "pnpm --filter @tributia/api db:migrate",
     "db:studio": "pnpm --filter @tributia/api db:studio"
