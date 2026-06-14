@@ -58,6 +58,9 @@ export const eventosOperativos = pgTable(
 
     payload: jsonb('payload').notNull(),
 
+    // Imputación a partida de la EDT (P5) — FK añadida en migración 0012.
+    partidaId: uuid('partida_id'),
+
     // Referencia al documento de origen (OC, recepción, parte diario, etc.).
     referenciaId: uuid('referencia_id'),
     referenciaTabla: varchar('referencia_tabla', { length: 100 }),

@@ -6,6 +6,7 @@ export interface ImportContext {
   tenantId: string;
   usuarioId: string;
   empresaId?: string;
+  proyectoId?: string;
 }
 
 type CellScalar = string | number | null;

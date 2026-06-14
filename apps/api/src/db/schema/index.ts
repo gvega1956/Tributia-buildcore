@@ -26,3 +26,4 @@ export * from './documental/archivo.js';
 export * from './documental/version_archivo.js';
 export * from './notificaciones/notificacion.js';
 export * from './proyectos/proyecto.js';
+export * from './proyectos/partida.js';

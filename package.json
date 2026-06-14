@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "pnpm --filter @tributia/api dev",
     "build": "pnpm -r build",
-    "lint": "eslint . --ext .ts --max-warnings 0",
+    "lint": "node --max-old-space-size=4096 node_modules/eslint/bin/eslint.js . --ext .ts --max-warnings 0",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r build && vitest run",
     "test:watch": "vitest",
