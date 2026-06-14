@@ -13,9 +13,17 @@ export const PERMISSIONS = {
   PROYECTO_WRITE: 'proyecto:write',
   PROYECTO_DELETE: 'proyecto:delete',
 
-  // EDT / Presupuesto
+  // EDT / Partidas
   EDT_READ: 'edt:read',
   EDT_WRITE: 'edt:write',
+
+  // APU (Análisis de Precio Unitario)
+  APU_READ: 'apu:read',
+  APU_WRITE: 'apu:write',
+
+  // Presupuesto
+  PRESUPUESTO_READ: 'presupuesto:read',
+  PRESUPUESTO_WRITE: 'presupuesto:write',
   PRESUPUESTO_APPROVE: 'presupuesto:approve',
 
   // Compras
