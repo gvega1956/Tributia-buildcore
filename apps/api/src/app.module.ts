@@ -18,6 +18,7 @@ import { InventarioModule } from './inventario/inventario.module.js';
 import { ComprasModule } from './compras/compras.module.js';
 import { ObraModule } from './obra/obra.module.js';
 import { OrdenesCambioModule } from './ordenes-cambio/ordenes-cambio.module.js';
+import { TableroModule } from './tablero/tablero.module.js';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { OrdenesCambioModule } from './ordenes-cambio/ordenes-cambio.module.js';
     ComprasModule,
     ObraModule,
     OrdenesCambioModule,
+    TableroModule,
     HealthModule,
   ],
   providers: [

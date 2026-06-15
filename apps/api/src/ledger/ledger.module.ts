@@ -20,6 +20,7 @@ import { ObraAvancePartidaHandler } from '../obra/handlers/obra-avance-partida.h
 import { ObraHoraPersonalHandler } from '../obra/handlers/obra-hora-personal.handler.js';
 import { ObraHoraEquipoHandler } from '../obra/handlers/obra-hora-equipo.handler.js';
 import { OrdenCambioAprobadaHandler } from '../ordenes-cambio/handlers/orden-cambio-aprobada.handler.js';
+import { PagoEjecucionPartidaHandler } from '../tablero/handlers/pago-ejecucion-partida.handler.js';
 import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
 
 @Module({
@@ -39,6 +40,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
     ObraHoraPersonalHandler,
     ObraHoraEquipoHandler,
     OrdenCambioAprobadaHandler,
+    PagoEjecucionPartidaHandler,
     {
       provide: PROJECTION_HANDLER_TOKEN,
       useFactory: (
@@ -58,6 +60,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         obraHoraPersonal: ObraHoraPersonalHandler,
         obraHoraEquipo: ObraHoraEquipoHandler,
         ordenCambioAprobada: OrdenCambioAprobadaHandler,
+        pagoEjecucionPartida: PagoEjecucionPartidaHandler,
       ) => [
         contador,
         notificacion,
@@ -75,6 +78,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         obraHoraPersonal,
         obraHoraEquipo,
         ordenCambioAprobada,
+        pagoEjecucionPartida,
       ],
       inject: [
         ContadorSincronoHandler,
@@ -93,6 +97,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         ObraHoraPersonalHandler,
         ObraHoraEquipoHandler,
         OrdenCambioAprobadaHandler,
+        PagoEjecucionPartidaHandler,
       ],
     },
     ProjectionEngineService,

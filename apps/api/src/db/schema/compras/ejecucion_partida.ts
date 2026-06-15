@@ -64,6 +64,11 @@ export const ejecucionPartidas = pgTable(
       .notNull()
       .default('0.0000'),
 
+    // Monto total efectivamente pagado a proveedores (actualizado por PagoEjecucionPartidaHandler)
+    pagado: numeric('pagado', { precision: 18, scale: 4 })
+      .notNull()
+      .default('0.0000'),
+
     moneda: varchar('moneda', { length: 3 }).notNull().default('DOP'),
 
     // Fecha de la última actualización (sin created_by/updated_by requeridos
