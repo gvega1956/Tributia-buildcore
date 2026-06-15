@@ -53,6 +53,17 @@ export const ejecucionPartidas = pgTable(
       .notNull()
       .default('0.0000'),
 
+    // Deltas de Órdenes de Cambio aprobadas (§9). Actualizados por OrdenCambioAprobadaHandler.
+    // Presupuesto vigente por partida = linea_presupuesto.total (BASE) + presupuesto_adicional_oc
+    presupuestoAdicionalOc: numeric('presupuesto_adicional_oc', { precision: 18, scale: 4 })
+      .notNull()
+      .default('0.0000'),
+
+    // Cantidad física adicional aprobada por OCs (para vigente check en avance)
+    cantidadAdicionalOc: numeric('cantidad_adicional_oc', { precision: 18, scale: 4 })
+      .notNull()
+      .default('0.0000'),
+
     moneda: varchar('moneda', { length: 3 }).notNull().default('DOP'),
 
     // Fecha de la última actualización (sin created_by/updated_by requeridos

@@ -6,6 +6,8 @@ import { newId } from '@tributia/shared';
 import type { ProjectionHandler, ProjectionContext } from '../../ledger/projection.types.js';
 import { ejecucionPartidas } from '../../db/schema/compras/ejecucion_partida.js';
 import { partidas } from '../../db/schema/proyectos/partida.js';
+import { versionesPresupuesto } from '../../db/schema/proyectos/presupuesto.js';
+import { lineasPresupuesto } from '../../db/schema/proyectos/presupuesto.js';
 import { outbox } from '../../db/schema/ledger/outbox.js';
 
 /**
@@ -16,8 +18,10 @@ import { outbox } from '../../db/schema/ledger/outbox.js';
  *
  * Consecuencias síncronas en la misma transacción:
  *   1. Incrementa ejecucion_partida.avance_cantidad
- *   2. Si avance acumulado > cantidad_presupuestada: inserta alerta en outbox
- *      (no bloquea — el residente gestiona un cambio de orden si aplica)
+ *   2. REGLA DE ORO: si la partida no tiene línea en presupuesto BASE aprobado
+ *      → inserta ALERTA_TRABAJO_SIN_PRESUPUESTO en outbox
+ *   3. Si avance acumulado > cantidad vigente (BASE + OC delta):
+ *      → inserta ALERTA_AVANCE_EXCESO en outbox
  */
 @Injectable()
 export class ObraAvancePartidaHandler implements ProjectionHandler {
@@ -78,41 +82,95 @@ export class ObraAvancePartidaHandler implements ProjectionHandler {
       });
     }
 
-    // ── 2. Alertar si el avance acumulado supera la cantidad presupuestada ─────
+    // ── 2. REGLA DE ORO: alertar si partida sin cobertura en presupuesto BASE ─
+    if (evento.proyectoId) {
+      const [baseVersion] = await tx
+        .select({ id: versionesPresupuesto.id })
+        .from(versionesPresupuesto)
+        .where(
+          and(
+            eq(versionesPresupuesto.tenantId, evento.tenantId),
+            eq(versionesPresupuesto.proyectoId, evento.proyectoId),
+            eq(versionesPresupuesto.tipo, 'BASE'),
+            eq(versionesPresupuesto.estado, 'APROBADO'),
+          ),
+        )
+        .limit(1);
+
+      if (baseVersion) {
+        const [lineaBase] = await tx
+          .select({ id: lineasPresupuesto.id })
+          .from(lineasPresupuesto)
+          .where(
+            and(
+              eq(lineasPresupuesto.versionPresupuestoId, baseVersion.id),
+              eq(lineasPresupuesto.partidaId, payload.partidaId),
+            ),
+          )
+          .limit(1);
+
+        if (!lineaBase) {
+          this.logger.warn(
+            `Regla de Oro: partida ${payload.partidaId} sin cobertura en presupuesto BASE`,
+          );
+
+          await tx.insert(outbox).values({
+            id: newId(),
+            eventoId: evento.id,
+            handlerNombre: 'ALERTA_TRABAJO_SIN_PRESUPUESTO',
+            tenantId: evento.tenantId,
+            payload: {
+              tipo: 'ALERTA_TRABAJO_SIN_PRESUPUESTO',
+              proyectoId: evento.proyectoId,
+              partidaId: payload.partidaId,
+              eventoId: evento.id,
+            },
+            estado: 'pendiente',
+            intentos: 0,
+            maxIntentos: 5,
+            proximoIntentoEn: now,
+          });
+        }
+      }
+    }
+
+    // ── 3. Alertar si avance acumulado supera la cantidad vigente (BASE + OC) ─
     const [partida] = await tx
       .select({ cantidadPresupuestada: partidas.cantidadPresupuestada })
       .from(partidas)
       .where(eq(partidas.id, payload.partidaId))
       .limit(1);
 
-    if (
-      partida?.cantidadPresupuestada &&
-      avanceCantidadNuevo.gt(new Decimal(partida.cantidadPresupuestada))
-    ) {
-      this.logger.warn(
-        `Avance acumulado (${avanceCantidadNuevo.toFixed(4)}) supera ` +
-        `cantidad_presupuestada (${partida.cantidadPresupuestada}) ` +
-        `en partida ${payload.partidaId}`,
-      );
+    if (partida?.cantidadPresupuestada) {
+      const cantidadAdicionalOc = new Decimal(existente?.cantidadAdicionalOc ?? '0');
+      const cantidadVigente = new Decimal(partida.cantidadPresupuestada).plus(cantidadAdicionalOc);
 
-      await tx.insert(outbox).values({
-        id: newId(),
-        eventoId: evento.id,
-        handlerNombre: 'ALERTA_AVANCE_EXCESO',
-        tenantId: evento.tenantId,
-        payload: {
-          tipo: 'ALERTA_AVANCE_EXCESO',
-          proyectoId: payload.proyectoId,
-          partidaId: payload.partidaId,
-          avanceCantidadNuevo: avanceCantidadNuevo.toFixed(4),
-          cantidadPresupuestada: partida.cantidadPresupuestada,
+      if (avanceCantidadNuevo.gt(cantidadVigente)) {
+        this.logger.warn(
+          `Avance acumulado (${avanceCantidadNuevo.toFixed(4)}) supera ` +
+          `cantidad vigente (${cantidadVigente.toFixed(4)}) ` +
+          `en partida ${payload.partidaId}`,
+        );
+
+        await tx.insert(outbox).values({
+          id: newId(),
           eventoId: evento.id,
-        },
-        estado: 'pendiente',
-        intentos: 0,
-        maxIntentos: 5,
-        proximoIntentoEn: now,
-      });
+          handlerNombre: 'ALERTA_AVANCE_EXCESO',
+          tenantId: evento.tenantId,
+          payload: {
+            tipo: 'ALERTA_AVANCE_EXCESO',
+            proyectoId: payload.proyectoId,
+            partidaId: payload.partidaId,
+            avanceCantidadNuevo: avanceCantidadNuevo.toFixed(4),
+            cantidadPresupuestada: partida.cantidadPresupuestada,
+            eventoId: evento.id,
+          },
+          estado: 'pendiente',
+          intentos: 0,
+          maxIntentos: 5,
+          proximoIntentoEn: now,
+        });
+      }
     }
   }
 }

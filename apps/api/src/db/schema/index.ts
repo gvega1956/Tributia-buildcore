@@ -50,3 +50,5 @@ export * from './obra/avance_obra.js';
 export * from './obra/foto_parte.js';
 export * from './obra/rfi.js';
 export * from './obra/punch_list_item.js';
+export * from './ordenes_cambio/orden_cambio.js';
+export * from './ordenes_cambio/linea_orden_cambio.js';

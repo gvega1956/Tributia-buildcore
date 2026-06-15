@@ -49,6 +49,11 @@ export const PERMISSIONS = {
   AVANCE_WRITE: 'avance:write',
   RFI_WRITE: 'rfi:write',
 
+  // Órdenes de Cambio (Change Orders §9)
+  ORDEN_CAMBIO_READ: 'orden_cambio:read',
+  ORDEN_CAMBIO_WRITE: 'orden_cambio:write',
+  ORDEN_CAMBIO_APPROVE: 'orden_cambio:approve',
+
   // Contabilidad
   ASIENTO_READ: 'asiento:read',
   ASIENTO_MANUAL: 'asiento:manual',

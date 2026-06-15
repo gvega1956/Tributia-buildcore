@@ -95,6 +95,12 @@ export const proyectos = pgTable(
 
     activo: boolean('activo').notNull().default(true),
 
+    // Suma acumulada de montos aprobados de Órdenes de Cambio (§9).
+    // presupuesto vigente total = monto_contrato + presupuesto_vigente_monto
+    presupuestoVigenteMonto: numeric('presupuesto_vigente_monto', { precision: 18, scale: 4 })
+      .notNull()
+      .default('0.0000'),
+
     ...auditColumns,
     ...softDeleteColumns,
   },
