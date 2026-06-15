@@ -87,6 +87,9 @@ export const PERMISSIONS = {
   EQUIPO_CATALOGO_WRITE: 'equipo_catalogo:write',
   CATALOGO_DGII_READ: 'catalogo_dgii:read',
 
+  // Sincronización offline (P7)
+  SYNC_WRITE: 'sync:write',
+
   // Reportes / BI
   REPORTE_FINANCIERO: 'reporte:financiero',
   REPORTE_EJECUTIVO: 'reporte:ejecutivo',

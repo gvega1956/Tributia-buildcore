@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tributia BuildCore — App de Campo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      min-height: 100vh;
+    }
+    header {
+      background: #2d3748;
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 { font-size: 1.1rem; font-weight: 700; }
+    #status-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+    }
+    #conn-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #68d391;
+      transition: background 0.3s;
+    }
+    #conn-dot.offline { background: #fc8181; }
+    .tabs {
+      display: flex;
+      background: #4a5568;
+    }
+    .tab {
+      flex: 1;
+      padding: 0.75rem;
+      text-align: center;
+      color: #a0aec0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      color: white;
+      border-bottom-color: #63b3ed;
+      background: #2d3748;
+    }
+    .panel { display: none; padding: 1.5rem; max-width: 600px; margin: 0 auto; }
+    .panel.active { display: block; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .card h2 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: #2d3748; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: #4a5568; margin-bottom: 0.35rem; }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      margin-bottom: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus { border-color: #63b3ed; }
+    .btn {
+      width: 100%;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn:active { opacity: 0.8; }
+    .btn-primary { background: #4299e1; color: white; }
+    .btn-success { background: #48bb78; color: white; }
+    .btn-warning { background: #ed8936; color: white; }
+    .queue-badge {
+      display: inline-block;
+      background: #ed8936;
+      color: white;
+      border-radius: 20px;
+      padding: 0.15rem 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-left: 0.5rem;
+    }
+    #queue-list { margin-top: 0.5rem; }
+    .queue-item {
+      background: #fff7ed;
+      border: 1px solid #fbd38d;
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .queue-item .tipo { font-weight: 700; color: #c05621; }
+    .queue-item .detalle { color: #718096; margin-top: 0.2rem; }
+    .queue-item .ts { color: #a0aec0; font-size: 0.75rem; margin-top: 0.2rem; }
+    .result-item {
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
+    }
+    .result-item.PENDIENTE_EJECUCION { background: #ebf8ff; border: 1px solid #90cdf4; }
+    .result-item.CONFLICTO { background: #fff5f5; border: 1px solid #fc8181; }
+    .result-item.ERROR { background: #fff5f5; border: 1px solid #fc8181; }
+    .result-item.PROCESADO { background: #f0fff4; border: 1px solid #9ae6b4; }
+    .offline-banner {
+      background: #fc8181;
+      color: white;
+      padding: 0.6rem 1rem;
+      text-align: center;
+      font-weight: 700;
+      display: none;
+    }
+    .offline-banner.show { display: block; }
+    .photo-preview {
+      width: 80px; height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-right: 0.5rem;
+    }
+    #geo-label { font-size: 0.8rem; color: #718096; margin-bottom: 0.9rem; }
+    .sync-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .stat-box {
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.6rem;
+      text-align: center;
+    }
+    .stat-box .val { font-size: 1.5rem; font-weight: 800; }
+    .stat-box .lbl { font-size: 0.7rem; color: #718096; }
+    .stat-box.pend .val { color: #ed8936; }
+    .stat-box.conf .val { color: #e53e3e; }
+    .stat-box.ok .val   { color: #38a169; }
+    .empty { color: #a0aec0; font-size: 0.9rem; text-align: center; padding: 1rem 0; }
+  </style>
+</head>
+<body>
+
+<div class="offline-banner" id="offline-banner">
+  ⚠️ SIN CONEXIÓN — Las operaciones se guardan localmente y se sincronizan al recuperar señal.
+</div>
+
+<header>
+  <h1>Tributia BuildCore · Campo</h1>
+  <div id="status-bar">
+    <div id="conn-dot"></div>
+    <span id="conn-label">En línea</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('almacenista')">🏗️ Almacenista</div>
+  <div class="tab" onclick="switchTab('residente')">📐 Residente</div>
+  <div class="tab" onclick="switchTab('cola')">📤 Cola <span class="queue-badge" id="badge">0</span></div>
+</div>
+
+<!-- ── ALMACENISTA ─────────────────────────────────────────────────────────── -->
+<div class="panel active" id="tab-almacenista">
+  <div class="card">
+    <h2>🏗️ Despacho de Material</h2>
+    <label>Empresa ID</label>
+    <input id="alm-empresa" placeholder="UUID de la empresa" value="">
+    <label>Insumo ID</label>
+    <input id="alm-insumo" placeholder="UUID del insumo">
+    <label>Almacén ID</label>
+    <input id="alm-almacen" placeholder="UUID del almacén">
+    <label>Partida ID</label>
+    <input id="alm-partida" placeholder="UUID de la partida">
+    <label>Cantidad</label>
+    <input id="alm-cantidad" type="number" step="0.0001" placeholder="ej. 10.5000">
+    <label>Unidad</label>
+    <input id="alm-unidad" placeholder="ej. m3, saco, kg">
+    <label>Costo unitario (DOP)</label>
+    <input id="alm-costo" type="number" step="0.01" placeholder="ej. 1500.00">
+    <button class="btn btn-primary" onclick="registrarConsumo()">
+      📦 Registrar Despacho
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>📸 Foto de campo</h2>
+    <label>Entidad tipo</label>
+    <select id="alm-foto-tipo">
+      <option value="parte_diario">Parte diario</option>
+      <option value="recepcion_oc">Recepción OC</option>
+      <option value="avance_obra">Avance de obra</option>
+    </select>
+    <label>Entidad ID</label>
+    <input id="alm-foto-entidad" placeholder="UUID de la entidad">
+    <label>Foto (se simula hash en demo)</label>
+    <input type="file" id="alm-foto-file" accept="image/*" onchange="previewFoto(this,'alm-preview')">
+    <img id="alm-preview" class="photo-preview" style="display:none">
+    <div id="geo-label" id="geo-info">⏳ Obteniendo GPS…</div>
+    <button class="btn btn-warning" onclick="registrarFoto('alm')">
+      📸 Registrar Foto Offline
+    </button>
+  </div>
+</div>
+
+<!-- ── RESIDENTE ──────────────────────────────────────────────────────────── -->
+<div class="panel" id="tab-residente">
+  <div class="card">
+    <h2>📐 Reporte de Avance</h2>
+    <label>Empresa ID</label>
+    <input id="res-empresa" placeholder="UUID de la empresa">
+    <label>Proyecto ID</label>
+    <input id="res-proyecto" placeholder="UUID del proyecto">
+    <label>Partida ID</label>
+    <input id="res-partida" placeholder="UUID de la partida">
+    <label>Cantidad ejecutada</label>
+    <input id="res-cantidad" type="number" step="0.0001" placeholder="ej. 5.2500">
+    <label>Unidad</label>
+    <input id="res-unidad" placeholder="ej. m3, m2, ml">
+    <label>Rol del reportante</label>
+    <select id="res-rol">
+      <option value="RESIDENTE">RESIDENTE</option>
+      <option value="ADMIN">ADMIN</option>
+      <option value="OPERARIO">OPERARIO</option>
+    </select>
+    <button class="btn btn-success" onclick="registrarAvance()">
+      📊 Registrar Avance
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>⏱️ Reporte de Horas</h2>
+    <label>Empresa ID</label>
+    <input id="res-hrs-empresa" placeholder="UUID de la empresa">
+    <label>Partida ID</label>
+    <input id="res-hrs-partida" placeholder="UUID de la partida">
+    <label>Horas trabajadas</label>
+    <input id="res-horas" type="number" step="0.5" placeholder="ej. 8.0">
+    <label>Tarifa/hora (DOP)</label>
+    <input id="res-tarifa" type="number" step="0.01" placeholder="ej. 500.00">
+    <button class="btn btn-success" onclick="registrarHoras()">
+      ⏱️ Registrar Horas
+    </button>
+  </div>
+</div>
+
+<!-- ── COLA ────────────────────────────────────────────────────────────────── -->
+<div class="panel" id="tab-cola">
+  <div class="card">
+    <h2>📤 Cola de sincronización</h2>
+    <div class="sync-summary">
+      <div class="stat-box pend">
+        <div class="val" id="stat-pend">–</div>
+        <div class="lbl">Pendientes</div>
+      </div>
+      <div class="stat-box conf">
+        <div class="val" id="stat-conf">–</div>
+        <div class="lbl">Conflictos</div>
+      </div>
+      <div class="stat-box ok">
+        <div class="val" id="stat-proc">–</div>
+        <div class="lbl">Procesados</div>
+      </div>
+      <div class="stat-box">
+        <div class="val" id="stat-anul">–</div>
+        <div class="lbl">Anulados</div>
+      </div>
+    </div>
+
+    <label>JWT Token (Bearer)</label>
+    <input id="jwt-token" placeholder="Pegar token de autenticación" type="password">
+    <label>URL del API</label>
+    <input id="api-url" value="http://localhost:3000" placeholder="http://localhost:3000">
+
+    <button class="btn btn-primary" onclick="sincronizar()" style="margin-bottom:0.5rem">
+      🔄 Sincronizar ahora
+    </button>
+    <button class="btn btn-warning" onclick="limpiarCola()">
+      🗑️ Limpiar cola local
+    </button>
+  </div>
+
+  <div class="card">
+    <h2>📋 Operaciones pendientes</h2>
+    <div id="queue-list"><p class="empty">Cola vacía — todas las operaciones sincronizadas.</p></div>
+  </div>
+
+  <div class="card" id="results-card" style="display:none">
+    <h2>✅ Resultado de sincronización</h2>
+    <div id="sync-results"></div>
+  </div>
+</div>
+
+<script>
+// ── Estado local ──────────────────────────────────────────────────────────────
+const QUEUE_KEY = 'tributia_campo_queue';
+const FOTOS_KEY = 'tributia_campo_fotos';
+
+let geo = null;
+
+// Intentar obtener GPS al cargar
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      geo = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+      document.querySelectorAll('#geo-label, #geo-info').forEach(el => {
+        el.textContent = `📍 GPS: ${geo.lat.toFixed(5)}, ${geo.lng.toFixed(5)} (±${Math.round(geo.acc)}m)`;
+      });
+    },
+    () => {
+      document.querySelectorAll('#geo-label, #geo-info').forEach(el => {
+        el.textContent = '📍 GPS no disponible — foto sin coordenadas';
+      });
+    },
+  );
+}
+
+// ── Detección offline ─────────────────────────────────────────────────────────
+function updateConnStatus() {
+  const online = navigator.onLine;
+  document.getElementById('conn-dot').className = online ? '' : 'offline';
+  document.getElementById('conn-label').textContent = online ? 'En línea' : 'Sin conexión';
+  document.getElementById('offline-banner').className = online ? 'offline-banner' : 'offline-banner show';
+}
+window.addEventListener('online', updateConnStatus);
+window.addEventListener('offline', updateConnStatus);
+updateConnStatus();
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['almacenista', 'residente', 'cola'];
+    t.className = 'tab' + (names[i] === name ? ' active' : '');
+  });
+  document.querySelectorAll('.panel').forEach(p => p.className = 'panel');
+  document.getElementById('tab-' + name).className = 'panel active';
+  if (name === 'cola') { renderQueue(); fetchEstado(); }
+}
+
+// ── Cola local (localStorage) ─────────────────────────────────────────────────
+function getQueue() { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); }
+function saveQueue(q) { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); updateBadge(); }
+
+function addToQueue(op) {
+  const q = getQueue();
+  q.push({ ...op, _ts: new Date().toISOString() });
+  saveQueue(q);
+  renderQueue();
+  alert(`✅ Operación registrada offline.\nSe enviará al servidor cuando sincronices.`);
+}
+
+function updateBadge() {
+  document.getElementById('badge').textContent = getQueue().length;
+}
+
+function renderQueue() {
+  const q = getQueue();
+  const el = document.getElementById('queue-list');
+  if (q.length === 0) {
+    el.innerHTML = '<p class="empty">Cola vacía — todas las operaciones sincronizadas.</p>';
+    return;
+  }
+  el.innerHTML = q.map((op, i) => `
+    <div class="queue-item">
+      <div class="tipo">#${i + 1} · ${op.tipoOperacion}</div>
+      <div class="detalle">${formatDetalle(op)}</div>
+      <div class="ts">${new Date(op._ts).toLocaleString('es-DO')} · Dispositivo: ${op.dispositivoId.slice(0, 8)}…</div>
+    </div>
+  `).join('');
+}
+
+function formatDetalle(op) {
+  if (op.tipoOperacion === 'consumo_material') {
+    return `Cantidad: ${op.payload.cantidad} ${op.payload.unidad || ''} · Partida: ${(op.payload.partidaId||'').slice(0,8)}…`;
+  }
+  if (op.tipoOperacion === 'avance_partida') {
+    return `Avance: ${op.payload.cantidadEjecutada} ${op.payload.unidad || ''} · Partida: ${(op.payload.partidaId||'').slice(0,8)}… · Rol: ${op.rolUsuario}`;
+  }
+  if (op.tipoOperacion === 'hora_personal') {
+    return `Horas: ${op.payload.horas} × $${op.payload.tarifaHora}/h`;
+  }
+  return JSON.stringify(op.payload).slice(0, 80);
+}
+
+function limpiarCola() {
+  if (!confirm('¿Limpiar la cola local? Las operaciones no sincronizadas se perderán.')) return;
+  saveQueue([]);
+  renderQueue();
+}
+
+// ── Dispositivo ID único por navegador ────────────────────────────────────────
+function getDeviceId() {
+  let id = localStorage.getItem('tributia_device_id');
+  if (!id) {
+    id = 'web-' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('tributia_device_id', id);
+  }
+  return id;
+}
+
+// ── Almacenista: registrar consumo ────────────────────────────────────────────
+function registrarConsumo() {
+  const empresaId = document.getElementById('alm-empresa').value.trim();
+  const insumoId = document.getElementById('alm-insumo').value.trim();
+  const almacenId = document.getElementById('alm-almacen').value.trim();
+  const partidaId = document.getElementById('alm-partida').value.trim();
+  const cantidad = parseFloat(document.getElementById('alm-cantidad').value);
+  const unidad = document.getElementById('alm-unidad').value.trim();
+  const costoUnitario = parseFloat(document.getElementById('alm-costo').value);
+
+  if (!empresaId || !insumoId || !almacenId || !partidaId || !cantidad || !unidad) {
+    alert('Completa todos los campos obligatorios.'); return;
+  }
+
+  addToQueue({
+    idempotencyKey: `${getDeviceId()}-consumo-${Date.now()}`,
+    tipoOperacion: 'consumo_material',
+    empresaId,
+    payload: {
+      insumoId, almacenId, partidaId,
+      cantidad: cantidad.toFixed(4),
+      unidad,
+      costoUnitario: (costoUnitario || 0).toFixed(4),
+    },
+    ocurridoEn: new Date().toISOString(),
+    dispositivoId: getDeviceId(),
+    rolUsuario: 'ALMACENISTA',
+  });
+}
+
+// ── Residente: registrar avance ───────────────────────────────────────────────
+function registrarAvance() {
+  const empresaId = document.getElementById('res-empresa').value.trim();
+  const proyectoId = document.getElementById('res-proyecto').value.trim();
+  const partidaId = document.getElementById('res-partida').value.trim();
+  const cantidad = parseFloat(document.getElementById('res-cantidad').value);
+  const unidad = document.getElementById('res-unidad').value.trim();
+  const rol = document.getElementById('res-rol').value;
+
+  if (!empresaId || !proyectoId || !partidaId || !cantidad || !unidad) {
+    alert('Completa todos los campos obligatorios.'); return;
+  }
+
+  addToQueue({
+    idempotencyKey: `${getDeviceId()}-avance-${Date.now()}`,
+    tipoOperacion: 'avance_partida',
+    empresaId,
+    payload: {
+      parteDiarioId: crypto.randomUUID(),
+      avanceObraId: crypto.randomUUID(),
+      proyectoId,
+      partidaId,
+      cantidadEjecutada: cantidad.toFixed(4),
+      unidad,
+    },
+    ocurridoEn: new Date().toISOString(),
+    dispositivoId: getDeviceId(),
+    rolUsuario: rol,
+  });
+}
+
+// ── Residente: registrar horas ────────────────────────────────────────────────
+function registrarHoras() {
+  const empresaId = document.getElementById('res-hrs-empresa').value.trim();
+  const partidaId = document.getElementById('res-hrs-partida').value.trim();
+  const horas = parseFloat(document.getElementById('res-horas').value);
+  const tarifa = parseFloat(document.getElementById('res-tarifa').value);
+
+  if (!empresaId || !partidaId || !horas) {
+    alert('Completa empresa, partida y horas.'); return;
+  }
+
+  addToQueue({
+    idempotencyKey: `${getDeviceId()}-horas-${Date.now()}`,
+    tipoOperacion: 'hora_personal',
+    empresaId,
+    payload: {
+      partidaId,
+      horas: horas.toFixed(2),
+      tarifaHora: (tarifa || 0).toFixed(4),
+      moneda: 'DOP',
+    },
+    ocurridoEn: new Date().toISOString(),
+    dispositivoId: getDeviceId(),
+    rolUsuario: 'RESIDENTE',
+  });
+}
+
+// ── Foto offline ──────────────────────────────────────────────────────────────
+function previewFoto(input, previewId) {
+  const preview = document.getElementById(previewId);
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+async function registrarFoto(prefix) {
+  const tipo = document.getElementById(`${prefix}-foto-tipo`).value;
+  const entidadId = document.getElementById(`${prefix}-foto-entidad`).value.trim();
+  const fileInput = document.getElementById(`${prefix}-foto-file`);
+
+  if (!entidadId) { alert('Ingresa el Entidad ID.'); return; }
+
+  // En un cliente real: hashear el archivo con SubtleCrypto
+  // Aquí simulamos con un hash basado en nombre+tamaño+timestamp
+  const file = fileInput.files[0];
+  const hashLocal = file
+    ? `sha256-demo-${file.name}-${file.size}-${Date.now()}`
+    : `sha256-no-file-${Date.now()}`;
+
+  const fotaMeta = {
+    tipoEntidad: tipo,
+    entidadId,
+    hashLocal,
+    latitud: geo?.lat,
+    longitud: geo?.lng,
+    precisionMetros: geo?.acc,
+    timestampCaptura: new Date().toISOString(),
+    bytes: file?.size,
+    mimeType: file?.type || 'image/jpeg',
+    _pendiente: true,
+  };
+
+  const fotos = JSON.parse(localStorage.getItem(FOTOS_KEY) || '[]');
+  fotos.push(fotaMeta);
+  localStorage.setItem(FOTOS_KEY, JSON.stringify(fotos));
+
+  alert(`📸 Foto registrada offline.\nHash: ${hashLocal.slice(0, 30)}…\nSe subirá cuando haya señal.`);
+}
+
+// ── Sincronización ────────────────────────────────────────────────────────────
+async function sincronizar() {
+  const q = getQueue();
+  if (q.length === 0) { alert('La cola está vacía. No hay nada que sincronizar.'); return; }
+
+  const token = document.getElementById('jwt-token').value.trim();
+  const apiUrl = document.getElementById('api-url').value.trim();
+
+  if (!token) { alert('Ingresa el JWT token para autenticarte.'); return; }
+  if (!navigator.onLine) { alert('Sin conexión. Espera a recuperar señal.'); return; }
+
+  try {
+    const ops = q.map(({ _ts, ...op }) => op); // quitar _ts antes de enviar
+    const resp = await fetch(`${apiUrl}/api/v1/sync/batch`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ operaciones: ops }),
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      document.getElementById('sync-results').innerHTML =
+        `<div class="result-item ERROR">Error ${resp.status}: ${JSON.stringify(data)}</div>`;
+      document.getElementById('results-card').style.display = 'block';
+      return;
+    }
+
+    // Limpiar cola local
+    saveQueue([]);
+    renderQueue();
+
+    // Mostrar resultados
+    const html = data.operaciones.map((r, i) => `
+      <div class="result-item ${r.estado}">
+        <strong>#${i + 1} ${r.estado}</strong>
+        ${r.conflictoDetalle ? `<br><small>${r.conflictoDetalle}</small>` : ''}
+      </div>
+    `).join('');
+
+    document.getElementById('sync-results').innerHTML = `
+      <div style="margin-bottom:0.8rem;font-size:0.9rem;color:#4a5568">
+        <b>${data.totalPendiente}</b> encoladas ·
+        <b style="color:#e53e3e">${data.totalConflicto}</b> conflictos ·
+        <b style="color:#e53e3e">${data.totalError}</b> errores
+      </div>
+      ${html}
+    `;
+    document.getElementById('results-card').style.display = 'block';
+    fetchEstado();
+  } catch (err) {
+    alert(`Error de red: ${err.message}`);
+  }
+}
+
+// ── Estado remoto ─────────────────────────────────────────────────────────────
+async function fetchEstado() {
+  const token = document.getElementById('jwt-token').value.trim();
+  const apiUrl = document.getElementById('api-url').value.trim();
+  if (!token || !navigator.onLine) return;
+
+  try {
+    const resp = await fetch(`${apiUrl}/api/v1/sync/estado`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    document.getElementById('stat-pend').textContent = data.pendienteEjecucion ?? 0;
+    document.getElementById('stat-conf').textContent = data.conflicto ?? 0;
+    document.getElementById('stat-proc').textContent = data.procesado ?? 0;
+    document.getElementById('stat-anul').textContent = data.anuladoPorConflicto ?? 0;
+  } catch { /* sin conexión */ }
+}
+
+// Inicializar
+updateBadge();
+</script>
+</body>
+</html>

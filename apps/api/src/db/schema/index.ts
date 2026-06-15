@@ -52,3 +52,5 @@ export * from './obra/rfi.js';
 export * from './obra/punch_list_item.js';
 export * from './ordenes_cambio/orden_cambio.js';
 export * from './ordenes_cambio/linea_orden_cambio.js';
+export * from './sincronizacion/cola_sincronizacion.js';
+export * from './sincronizacion/foto_campo.js';
