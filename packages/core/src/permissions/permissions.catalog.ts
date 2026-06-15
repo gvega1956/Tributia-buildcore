@@ -31,7 +31,13 @@ export const PERMISSIONS = {
   OC_READ: 'oc:read',
   OC_WRITE: 'oc:write',
   OC_APPROVE: 'oc:approve',
+  RECEPCION_READ: 'recepcion:read',
   RECEPCION_WRITE: 'recepcion:write',
+  FACTURA_PROV_READ: 'factura_prov:read',
+  FACTURA_PROV_WRITE: 'factura_prov:write',
+  CXP_READ: 'cxp:read',
+  ANTICIPO_WRITE: 'anticipo:write',
+  SCORING_READ: 'scoring:read',
 
   // Inventario
   INVENTARIO_READ: 'inventario:read',

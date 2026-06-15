@@ -92,6 +92,9 @@ importers:
       '@tributia/ledger':
         specifier: workspace:*
         version: link:../../packages/ledger
+      '@tributia/localizacion-do':
+        specifier: workspace:*
+        version: link:../../packages/localizacion-do
       '@tributia/proyectos':
         specifier: workspace:*
         version: link:../../packages/proyectos

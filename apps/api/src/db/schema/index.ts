@@ -38,3 +38,8 @@ export * from './compras/solicitud_cotizacion.js';
 export * from './compras/cotizacion.js';
 export * from './compras/orden_compra.js';
 export * from './compras/ejecucion_partida.js';
+export * from './compras/recepcion_oc.js';
+export * from './compras/factura_proveedor.js';
+export * from './compras/cuenta_por_pagar.js';
+export * from './compras/anticipo_proveedor.js';
+export * from './compras/scoring_proveedor.js';

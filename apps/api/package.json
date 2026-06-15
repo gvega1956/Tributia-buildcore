@@ -35,6 +35,7 @@
     "@tributia/inventario": "workspace:*",
     "@tributia/proyectos": "workspace:*",
     "@tributia/ledger": "workspace:*",
+    "@tributia/localizacion-do": "workspace:*",
     "@tributia/shared": "workspace:*",
     "@tributia/workflow": "workspace:*",
     "argon2": "^0.44.0",
