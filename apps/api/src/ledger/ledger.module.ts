@@ -13,6 +13,7 @@ import { InventarioRecepcionMaterialHandler } from '../inventario/handlers/inven
 import { InventarioConsumoMaterialHandler } from '../inventario/handlers/inventario-consumo-material.handler.js';
 import { InventarioTransferenciaAlmacenHandler } from '../inventario/handlers/inventario-transferencia-almacen.handler.js';
 import { InventarioAjusteInventarioHandler } from '../inventario/handlers/inventario-ajuste-inventario.handler.js';
+import { ComprasEmisionOcHandler } from '../compras/handlers/compras-emision-oc.handler.js';
 import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
 
 @Module({
@@ -25,6 +26,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
     InventarioConsumoMaterialHandler,
     InventarioTransferenciaAlmacenHandler,
     InventarioAjusteInventarioHandler,
+    ComprasEmisionOcHandler,
     {
       provide: PROJECTION_HANDLER_TOKEN,
       useFactory: (
@@ -37,6 +39,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         invConsumo: InventarioConsumoMaterialHandler,
         invTransferencia: InventarioTransferenciaAlmacenHandler,
         invAjuste: InventarioAjusteInventarioHandler,
+        comprasEmisionOc: ComprasEmisionOcHandler,
       ) => [
         contador,
         notificacion,
@@ -47,6 +50,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         invConsumo,
         invTransferencia,
         invAjuste,
+        comprasEmisionOc,
       ],
       inject: [
         ContadorSincronoHandler,
@@ -58,6 +62,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         InventarioConsumoMaterialHandler,
         InventarioTransferenciaAlmacenHandler,
         InventarioAjusteInventarioHandler,
+        ComprasEmisionOcHandler,
       ],
     },
     ProjectionEngineService,

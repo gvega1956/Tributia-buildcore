@@ -71,6 +71,9 @@ importers:
       '@tributia/catalogos':
         specifier: workspace:*
         version: link:../../packages/catalogos
+      '@tributia/compras':
+        specifier: workspace:*
+        version: link:../../packages/compras
       '@tributia/contabilidad':
         specifier: workspace:*
         version: link:../../packages/contabilidad

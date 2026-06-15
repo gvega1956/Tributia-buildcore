@@ -33,3 +33,8 @@ export * from './inventario/almacen.js';
 export * from './inventario/stock_almacen.js';
 export * from './inventario/movimiento_inventario.js';
 export * from './inventario/conteo_fisico.js';
+export * from './compras/requisicion.js';
+export * from './compras/solicitud_cotizacion.js';
+export * from './compras/cotizacion.js';
+export * from './compras/orden_compra.js';
+export * from './compras/ejecucion_partida.js';

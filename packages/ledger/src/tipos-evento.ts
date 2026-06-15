@@ -15,6 +15,7 @@ export const TIPOS_EVENTO = [
   'mantenimiento_ejecutado',
   'orden_cambio_aprobada',
   'ajuste_inventario',
+  'emision_oc',
   'evento_reversa',
 ] as const;
 

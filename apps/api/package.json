@@ -27,6 +27,7 @@
     "@nestjs/swagger": "^7.4.0",
     "@nestjs/throttler": "^6.2.1",
     "@tributia/catalogos": "workspace:*",
+    "@tributia/compras": "workspace:*",
     "@tributia/contabilidad": "workspace:*",
     "@tributia/core": "workspace:*",
     "@tributia/documental": "workspace:*",
