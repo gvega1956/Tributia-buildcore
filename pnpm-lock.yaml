@@ -83,6 +83,9 @@ importers:
       '@tributia/importadores':
         specifier: workspace:*
         version: link:../../packages/importadores
+      '@tributia/inventario':
+        specifier: workspace:*
+        version: link:../../packages/inventario
       '@tributia/ledger':
         specifier: workspace:*
         version: link:../../packages/ledger

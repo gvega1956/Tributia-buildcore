@@ -134,11 +134,19 @@ describe('Motor de proyecciones — atomicidad, outbox, worker, retry, dead-lett
   });
 
   afterAll(async () => {
+    // Limpiar en orden FK inverso. Triggers prevent_delete y append-only requieren DISABLE explícito.
     await adminPool.query(`DELETE FROM outbox WHERE tenant_id = $1`, [tenantId]);
     await adminPool.query(`DELETE FROM proyeccion_ledger_stats WHERE tenant_id = $1`, [tenantId]);
+    await adminPool.query(`ALTER TABLE evento_operativo DISABLE TRIGGER enforce_append_only_evento_operativo`);
     await adminPool.query(`DELETE FROM evento_operativo WHERE tenant_id = $1`, [tenantId]);
+    await adminPool.query(`ALTER TABLE evento_operativo ENABLE TRIGGER enforce_append_only_evento_operativo`);
+    await adminPool.query(`ALTER TABLE centro_costo DISABLE TRIGGER no_delete_centro_costo`);
     await adminPool.query(`DELETE FROM centro_costo WHERE id = $1`, [centroCostoId]);
+    await adminPool.query(`ALTER TABLE centro_costo ENABLE TRIGGER no_delete_centro_costo`);
+    await adminPool.query(`ALTER TABLE empresa DISABLE TRIGGER no_delete_empresa`);
     await adminPool.query(`DELETE FROM empresa WHERE id = $1`, [empresaId]);
+    await adminPool.query(`ALTER TABLE empresa ENABLE TRIGGER no_delete_empresa`);
+    await adminPool.query(`DELETE FROM audit_log WHERE tenant_id = $1`, [tenantId]);
     await adminPool.query(`ALTER TABLE tenant DISABLE TRIGGER no_delete_tenant`);
     await adminPool.query(`DELETE FROM tenant WHERE id = $1`, [tenantId]);
     await adminPool.query(`ALTER TABLE tenant ENABLE TRIGGER no_delete_tenant`);

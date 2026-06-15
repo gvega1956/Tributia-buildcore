@@ -14,6 +14,7 @@ import { NotificacionesModule } from './notificaciones/notificaciones.module.js'
 import { DocumentalModule } from './documental/documental.module.js';
 import { ImportadoresModule } from './importadores/importadores.module.js';
 import { ProyectosModule } from './proyectos/proyectos.module.js';
+import { InventarioModule } from './inventario/inventario.module.js';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ProyectosModule } from './proyectos/proyectos.module.js';
     DocumentalModule,
     ImportadoresModule,
     ProyectosModule,
+    InventarioModule,
     HealthModule,
   ],
   providers: [

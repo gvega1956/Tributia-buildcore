@@ -103,11 +103,17 @@ describe('Auditoría e inmutabilidad (P8)', () => {
   });
 
   afterAll(async () => {
-    // Limpiar en orden inverso a FK — audit_log se limpia automáticamente
-    // porque no tiene FK hacia los registros de test (solo registroId como UUID).
-    await adminDb.delete(schema.usuarios).where(eq(schema.usuarios.id, usuarioId));
-    await adminDb.delete(schema.empresas).where(eq(schema.empresas.id, empresaId));
-    await adminDb.delete(schema.tenants).where(eq(schema.tenants.id, tenantId));
+    // Limpiar en orden inverso a FK. Triggers prevent_delete requieren DISABLE explícito.
+    await adminPool.query(`ALTER TABLE usuario DISABLE TRIGGER no_delete_usuario`);
+    await adminPool.query(`DELETE FROM usuario WHERE id = $1`, [usuarioId]);
+    await adminPool.query(`ALTER TABLE usuario ENABLE TRIGGER no_delete_usuario`);
+    await adminPool.query(`ALTER TABLE empresa DISABLE TRIGGER no_delete_empresa`);
+    await adminPool.query(`DELETE FROM empresa WHERE id = $1`, [empresaId]);
+    await adminPool.query(`ALTER TABLE empresa ENABLE TRIGGER no_delete_empresa`);
+    await adminPool.query(`DELETE FROM audit_log WHERE tenant_id = $1`, [tenantId]);
+    await adminPool.query(`ALTER TABLE tenant DISABLE TRIGGER no_delete_tenant`);
+    await adminPool.query(`DELETE FROM tenant WHERE id = $1`, [tenantId]);
+    await adminPool.query(`ALTER TABLE tenant ENABLE TRIGGER no_delete_tenant`);
     await adminPool.end();
     await appPool.end();
   });

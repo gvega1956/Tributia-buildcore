@@ -31,6 +31,7 @@
     "@tributia/core": "workspace:*",
     "@tributia/documental": "workspace:*",
     "@tributia/importadores": "workspace:*",
+    "@tributia/inventario": "workspace:*",
     "@tributia/proyectos": "workspace:*",
     "@tributia/ledger": "workspace:*",
     "@tributia/shared": "workspace:*",

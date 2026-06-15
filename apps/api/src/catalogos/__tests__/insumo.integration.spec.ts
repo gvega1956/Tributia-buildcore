@@ -78,12 +78,13 @@ describe('Insumos y unidades de medida — integración (P4.4 + RLS)', () => {
   });
 
   afterAll(async () => {
-    await adminDb.delete(schema.insumosEquivalencia).where(eq(schema.insumosEquivalencia.tenantId, tenantA));
-    await adminDb.delete(schema.insumos).where(eq(schema.insumos.tenantId, tenantA));
-    await adminDb.delete(schema.unidadesMedida).where(eq(schema.unidadesMedida.tenantId, tenantA));
-    await adminDb.delete(schema.unidadesMedida).where(eq(schema.unidadesMedida.tenantId, tenantB));
-    await adminDb.delete(schema.tenants).where(eq(schema.tenants.id, tenantA));
-    await adminDb.delete(schema.tenants).where(eq(schema.tenants.id, tenantB));
+    await adminPool.query(`DELETE FROM insumo_equivalencia WHERE tenant_id IN ($1,$2)`, [tenantA, tenantB]);
+    await adminPool.query(`DELETE FROM insumo WHERE tenant_id IN ($1,$2)`, [tenantA, tenantB]);
+    await adminPool.query(`DELETE FROM unidad_medida WHERE tenant_id IN ($1,$2)`, [tenantA, tenantB]);
+    await adminPool.query(`DELETE FROM audit_log WHERE tenant_id IN ($1,$2)`, [tenantA, tenantB]);
+    await adminPool.query(`ALTER TABLE tenant DISABLE TRIGGER no_delete_tenant`);
+    await adminPool.query(`DELETE FROM tenant WHERE id IN ($1,$2)`, [tenantA, tenantB]);
+    await adminPool.query(`ALTER TABLE tenant ENABLE TRIGGER no_delete_tenant`);
     await adminPool.end();
     await appPool.end();
   });

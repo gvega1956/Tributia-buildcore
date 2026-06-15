@@ -75,14 +75,11 @@ describe('Tercero — integración (P4.2 + RLS)', () => {
   });
 
   afterAll(async () => {
-    await adminDb.delete(schema.terceros).where(
-      eq(schema.terceros.tenantId, tenantA),
-    );
-    await adminDb.delete(schema.terceros).where(
-      eq(schema.terceros.tenantId, tenantB),
-    );
-    await adminDb.delete(schema.tenants).where(eq(schema.tenants.id, tenantA));
-    await adminDb.delete(schema.tenants).where(eq(schema.tenants.id, tenantB));
+    await adminPool.query(`DELETE FROM tercero WHERE tenant_id IN ($1,$2)`, [tenantA, tenantB]);
+    await adminPool.query(`DELETE FROM audit_log WHERE tenant_id IN ($1,$2)`, [tenantA, tenantB]);
+    await adminPool.query(`ALTER TABLE tenant DISABLE TRIGGER no_delete_tenant`);
+    await adminPool.query(`DELETE FROM tenant WHERE id IN ($1,$2)`, [tenantA, tenantB]);
+    await adminPool.query(`ALTER TABLE tenant ENABLE TRIGGER no_delete_tenant`);
     await adminPool.end();
     await appPool.end();
   });

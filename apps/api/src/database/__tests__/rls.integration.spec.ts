@@ -143,19 +143,21 @@ describe('RLS — aislamiento de tenants', () => {
   });
 
   afterAll(async () => {
-    // Limpiar todos los datos de test (orden inverso a las FK)
-    await adminDb
-      .delete(schema.centrosCosto)
-      .where(inArray(schema.centrosCosto.tenantId, [tenantAId, tenantBId]));
-    await adminDb
-      .delete(schema.sucursales)
-      .where(inArray(schema.sucursales.tenantId, [tenantAId, tenantBId]));
-    await adminDb
-      .delete(schema.empresas)
-      .where(inArray(schema.empresas.tenantId, [tenantAId, tenantBId]));
-    await adminDb
-      .delete(schema.tenants)
-      .where(inArray(schema.tenants.id, [tenantAId, tenantBId]));
+    // Limpiar todos los datos de test (orden inverso a las FK).
+    // Triggers prevent_delete requieren DISABLE explícito.
+    await adminPool.query(`ALTER TABLE centro_costo DISABLE TRIGGER no_delete_centro_costo`);
+    await adminPool.query(`DELETE FROM centro_costo WHERE tenant_id IN ($1,$2)`, [tenantAId, tenantBId]);
+    await adminPool.query(`ALTER TABLE centro_costo ENABLE TRIGGER no_delete_centro_costo`);
+    await adminPool.query(`ALTER TABLE sucursal DISABLE TRIGGER no_delete_sucursal`);
+    await adminPool.query(`DELETE FROM sucursal WHERE tenant_id IN ($1,$2)`, [tenantAId, tenantBId]);
+    await adminPool.query(`ALTER TABLE sucursal ENABLE TRIGGER no_delete_sucursal`);
+    await adminPool.query(`ALTER TABLE empresa DISABLE TRIGGER no_delete_empresa`);
+    await adminPool.query(`DELETE FROM empresa WHERE tenant_id IN ($1,$2)`, [tenantAId, tenantBId]);
+    await adminPool.query(`ALTER TABLE empresa ENABLE TRIGGER no_delete_empresa`);
+    await adminPool.query(`DELETE FROM audit_log WHERE tenant_id IN ($1,$2)`, [tenantAId, tenantBId]);
+    await adminPool.query(`ALTER TABLE tenant DISABLE TRIGGER no_delete_tenant`);
+    await adminPool.query(`DELETE FROM tenant WHERE id IN ($1,$2)`, [tenantAId, tenantBId]);
+    await adminPool.query(`ALTER TABLE tenant ENABLE TRIGGER no_delete_tenant`);
 
     await adminPool.end();
     await appPool.end();

@@ -1,2 +1,1 @@
-// @tributia/inventario — almacenes, movimientos, kárdex
-export {};
+export * from './inventario.types.js';

@@ -75,12 +75,15 @@ describe('Motor de flujos de aprobación — transiciones de estado', () => {
   });
 
   afterAll(async () => {
-    // Eliminar en orden inverso a FK
+    // Eliminar en orden inverso a FK. Trigger no_delete_tenant requiere DISABLE explícito.
     await adminPool.query(`DELETE FROM aprobacion_paso WHERE tenant_id = $1`, [tenantId]);
     await adminPool.query(`DELETE FROM instancia_flujo WHERE tenant_id = $1`, [tenantId]);
     await adminPool.query(`DELETE FROM paso_flujo WHERE tenant_id = $1`, [tenantId]);
     await adminPool.query(`DELETE FROM tipo_flujo WHERE tenant_id = $1`, [tenantId]);
-    await adminDb.delete(schema.tenants).where(eq(schema.tenants.id, tenantId));
+    await adminPool.query(`DELETE FROM audit_log WHERE tenant_id = $1`, [tenantId]);
+    await adminPool.query(`ALTER TABLE tenant DISABLE TRIGGER no_delete_tenant`);
+    await adminPool.query(`DELETE FROM tenant WHERE id = $1`, [tenantId]);
+    await adminPool.query(`ALTER TABLE tenant ENABLE TRIGGER no_delete_tenant`);
     await adminPool.end();
   });
 

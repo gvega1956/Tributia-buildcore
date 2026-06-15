@@ -29,3 +29,7 @@ export * from './proyectos/proyecto.js';
 export * from './proyectos/partida.js';
 export * from './proyectos/apu.js';
 export * from './proyectos/presupuesto.js';
+export * from './inventario/almacen.js';
+export * from './inventario/stock_almacen.js';
+export * from './inventario/movimiento_inventario.js';
+export * from './inventario/conteo_fisico.js';
