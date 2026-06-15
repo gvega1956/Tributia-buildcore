@@ -58,7 +58,7 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
   let terceroId: string;
   let ocId: string;
   let lineaOcId: string;
-  let cxpId: string; // usado en test 15 (anticipo)
+  // cxpId removido — asignado pero no leído (test 15 usa localCxpId directamente)
 
   // handlers bajo prueba
   let handlerRecepcion: ComprasRecepcionOcHandler;
@@ -86,8 +86,8 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
     handlerRecepcion = new ComprasRecepcionOcHandler();
 
     // Para handler de factura: sin regla contable configurada → solo crea CxP
-    const mockRegla = { findByTipoEvento: async () => null };
-    const mockAsiento = { generar: async () => ({ id: newId() }) };
+    const mockRegla = { findByTipoEvento: () => Promise.resolve(null) };
+    const mockAsiento = { generar: () => Promise.resolve({ id: newId() }) };
     handlerFactura = new ComprasRecepcionFacturaProveedorHandler(
       mockRegla as never,
       mockAsiento as never,
@@ -616,7 +616,6 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
       [tenantId, evId],
     );
     const localCxpId = cxpRows[0]!.id as string;
-    cxpId = localCxpId; // guardar para referencia
 
     // Crear anticipo
     const anticipoId = newId();
@@ -630,7 +629,6 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
 
     // Amortizar 500 contra la CxP
     const montoAmortizar = '500.0000';
-    const nuevoAmortizado = new Decimal('0.0000').plus(montoAmortizar).toFixed(4);
 
     await adminPool.query(
       `UPDATE anticipo_proveedor

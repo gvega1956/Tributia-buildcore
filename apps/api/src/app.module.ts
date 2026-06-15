@@ -16,6 +16,7 @@ import { ImportadoresModule } from './importadores/importadores.module.js';
 import { ProyectosModule } from './proyectos/proyectos.module.js';
 import { InventarioModule } from './inventario/inventario.module.js';
 import { ComprasModule } from './compras/compras.module.js';
+import { ObraModule } from './obra/obra.module.js';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ComprasModule } from './compras/compras.module.js';
     ProyectosModule,
     InventarioModule,
     ComprasModule,
+    ObraModule,
     HealthModule,
   ],
   providers: [

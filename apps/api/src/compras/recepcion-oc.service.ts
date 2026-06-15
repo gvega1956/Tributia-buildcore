@@ -180,7 +180,7 @@ export class RecepcionOcService {
       .from(lineasOrdenCompra)
       .where(and(eq(lineasOrdenCompra.ordenCompraId, ocId), eq(lineasOrdenCompra.tenantId, tenantId)));
 
-    const todasRecibidas = lineasOc.every((l) => {
+    const todasRecibidas = lineasOc.every((_l) => {
       // Simplificación: verificar si existe al menos una recepcion_oc que cubre la línea
       return true; // En producción: comparar cantidades
     });

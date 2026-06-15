@@ -13,7 +13,6 @@ import {
 } from '../db/schema/compras/factura_proveedor.js';
 import { lineasOrdenCompra } from '../db/schema/compras/orden_compra.js';
 import { lineasRecepcionOc } from '../db/schema/compras/recepcion_oc.js';
-import { terceros } from '../db/schema/catalogos/tercero.js';
 
 const zUUID = z.string().uuid();
 const zDecimal = z.string().regex(/^\d+(\.\d{1,4})?$/);
@@ -270,7 +269,7 @@ export class FacturaProveedorService {
 
     // ── 5. Emitir evento → handler crea asiento + CxP ─────────────────────
     // Derivar proyectoId desde la OC si está vinculada; de lo contrario null
-    let proyectoId: string | null = null;
+    const proyectoId: string | null = null;
     if (dto.ordenCompraId && lineasOc.length > 0) {
       // proyectoId se derivará dentro del handler via la OC — aquí lo dejamos null
       // y el handler lo infiere del recepcion_oc → orden_compra → partida → proyecto
@@ -328,7 +327,7 @@ export class FacturaProveedorService {
       'DISCREPANCIA_PRECIO',
       'DISCREPANCIA_CANTIDAD',
     ];
-    if (!estadosDiscrepancia.includes(factura.estadoMatch as EstadoMatch)) {
+    if (!estadosDiscrepancia.includes(factura.estadoMatch)) {
       throw new BadRequestException(
         `Solo se puede aprobar excepción en estado DISCREPANCIA_*. Estado actual: ${factura.estadoMatch}`,
       );

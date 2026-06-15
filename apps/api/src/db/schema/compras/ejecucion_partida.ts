@@ -42,8 +42,14 @@ export const ejecucionPartidas = pgTable(
       .notNull()
       .default('0.0000'),
 
-    // Monto total de recepciones devengadas (costo real incurrido)
+    // Monto total de recepciones devengadas (costo real incurrido: materiales + MO + equipos)
     devengado: numeric('devengado', { precision: 18, scale: 4 })
+      .notNull()
+      .default('0.0000'),
+
+    // Cantidad física ejecutada acumulada (actualizada por handler avance_partida).
+    // El % de avance se calcula en vivo: avanceCantidad / partida.cantidad_presupuestada.
+    avanceCantidad: numeric('avance_cantidad', { precision: 18, scale: 4 })
       .notNull()
       .default('0.0000'),
 

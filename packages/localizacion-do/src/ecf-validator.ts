@@ -21,9 +21,6 @@ const REGEX_ECF = /^E(\d{2})(\d{8})$/;
 /** Regex para RNC (9 dígitos) */
 const REGEX_RNC = /^\d{9}$/;
 
-/** Regex para Cédula dominicana (11 dígitos, puede tener guiones) */
-const REGEX_CEDULA = /^\d{3}-?\d{7}-?\d$/;
-
 /** Meses máximos de antigüedad permitidos para un NCF (5 años = 60 meses) */
 const MAX_ANTIGUEDAD_MESES = 60;
 

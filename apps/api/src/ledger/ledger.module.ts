@@ -16,8 +16,9 @@ import { InventarioAjusteInventarioHandler } from '../inventario/handlers/invent
 import { ComprasEmisionOcHandler } from '../compras/handlers/compras-emision-oc.handler.js';
 import { ComprasRecepcionOcHandler } from '../compras/handlers/compras-recepcion-oc.handler.js';
 import { ComprasRecepcionFacturaProveedorHandler } from '../compras/handlers/compras-recepcion-factura-proveedor.handler.js';
-import { ReglaContableService } from '../contabilidad/regla-contable.service.js';
-import { AsientoContableService } from '../contabilidad/asiento-contable.service.js';
+import { ObraAvancePartidaHandler } from '../obra/handlers/obra-avance-partida.handler.js';
+import { ObraHoraPersonalHandler } from '../obra/handlers/obra-hora-personal.handler.js';
+import { ObraHoraEquipoHandler } from '../obra/handlers/obra-hora-equipo.handler.js';
 import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
 
 @Module({
@@ -33,6 +34,9 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
     ComprasEmisionOcHandler,
     ComprasRecepcionOcHandler,
     ComprasRecepcionFacturaProveedorHandler,
+    ObraAvancePartidaHandler,
+    ObraHoraPersonalHandler,
+    ObraHoraEquipoHandler,
     {
       provide: PROJECTION_HANDLER_TOKEN,
       useFactory: (
@@ -48,6 +52,9 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         comprasEmisionOc: ComprasEmisionOcHandler,
         comprasRecepcionOc: ComprasRecepcionOcHandler,
         comprasRecepcionFactura: ComprasRecepcionFacturaProveedorHandler,
+        obraAvance: ObraAvancePartidaHandler,
+        obraHoraPersonal: ObraHoraPersonalHandler,
+        obraHoraEquipo: ObraHoraEquipoHandler,
       ) => [
         contador,
         notificacion,
@@ -61,6 +68,9 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         comprasEmisionOc,
         comprasRecepcionOc,
         comprasRecepcionFactura,
+        obraAvance,
+        obraHoraPersonal,
+        obraHoraEquipo,
       ],
       inject: [
         ContadorSincronoHandler,
@@ -75,6 +85,9 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         ComprasEmisionOcHandler,
         ComprasRecepcionOcHandler,
         ComprasRecepcionFacturaProveedorHandler,
+        ObraAvancePartidaHandler,
+        ObraHoraPersonalHandler,
+        ObraHoraEquipoHandler,
       ],
     },
     ProjectionEngineService,
