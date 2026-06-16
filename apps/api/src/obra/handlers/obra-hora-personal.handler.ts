@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import Decimal from 'decimal.js';
 import { eq, and } from 'drizzle-orm';
 import { zPayloadHoraPersonal } from '@tributia/ledger';
@@ -18,8 +18,6 @@ import { AsientoContableService } from '../../contabilidad/asiento-contable.serv
  */
 @Injectable()
 export class ObraHoraPersonalHandler implements ProjectionHandler {
-  private readonly logger = new Logger(ObraHoraPersonalHandler.name);
-
   readonly nombre = 'ObraHoraPersonal';
   readonly tiposEvento = ['hora_personal'] as const;
   readonly modo = 'sincrono' as const;
@@ -105,8 +103,8 @@ export class ObraHoraPersonalHandler implements ProjectionHandler {
         tx,
       );
     } else {
-      this.logger.warn(
-        `Sin regla contable para hora_personal en empresa ${evento.empresaId} — evento ${evento.id}. Devengado actualizado sin asiento.`,
+      throw new Error(
+        `Regla contable requerida para 'hora_personal' no encontrada en empresa ${evento.empresaId}. Configure la regla antes de registrar horas de personal.`,
       );
     }
   }

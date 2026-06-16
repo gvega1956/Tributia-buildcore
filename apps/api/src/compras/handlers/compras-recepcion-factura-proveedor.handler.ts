@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import Decimal from 'decimal.js';
 import { zPayloadRecepcionFacturaProveedor } from '@tributia/ledger';
 import { newId } from '@tributia/shared';
@@ -25,8 +25,6 @@ import { AsientoContableService } from '../../contabilidad/asiento-contable.serv
  */
 @Injectable()
 export class ComprasRecepcionFacturaProveedorHandler implements ProjectionHandler {
-  private readonly logger = new Logger(ComprasRecepcionFacturaProveedorHandler.name);
-
   readonly nombre = 'ComprasRecepcionFacturaProveedor';
   readonly tiposEvento = ['recepcion_factura_proveedor'] as const;
   readonly modo = 'sincrono' as const;
@@ -78,8 +76,8 @@ export class ComprasRecepcionFacturaProveedorHandler implements ProjectionHandle
       );
       asientoId = asiento.id;
     } else {
-      this.logger.warn(
-        `Sin regla contable para recepcion_factura_proveedor en empresa ${evento.empresaId} — evento ${evento.id}. CxP creada sin asiento.`,
+      throw new Error(
+        `Regla contable requerida para 'recepcion_factura_proveedor' no encontrada en empresa ${evento.empresaId}. Configure la regla antes de registrar facturas de proveedor.`,
       );
     }
 

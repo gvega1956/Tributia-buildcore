@@ -28,9 +28,13 @@ import * as schema from '../../db/schema/index.js';
 import { newId, SYSTEM_USER_ID } from '@tributia/shared';
 import Decimal from 'decimal.js';
 import { validarEcf } from '@tributia/localizacion-do';
+import type { ConfiguracionRegla } from '@tributia/contabilidad';
 import { calcularMatch } from '../factura-proveedor.service.js';
 import { ComprasRecepcionOcHandler } from '../handlers/compras-recepcion-oc.handler.js';
 import { ComprasRecepcionFacturaProveedorHandler } from '../handlers/compras-recepcion-factura-proveedor.handler.js';
+import { ReglaContableService } from '../../contabilidad/regla-contable.service.js';
+import { CuentaContableService } from '../../contabilidad/cuenta-contable.service.js';
+import { AsientoContableService } from '../../contabilidad/asiento-contable.service.js';
 
 // ─── Conexiones ───────────────────────────────────────────────────────────────
 const ADMIN_URL =
@@ -60,6 +64,11 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
   let lineaOcId: string;
   // cxpId removido — asignado pero no leído (test 15 usa localCxpId directamente)
 
+  // Fixtures contables para recepcion_factura_proveedor (tests 12, 13)
+  let cuentaFactDebeId: string;   // 5101 Costo de obras en proceso
+  let cuentaFactHaberId: string;  // 2101 Cuentas por Pagar Proveedores
+  let reglaFacturaId: string;
+
   // handlers bajo prueba
   let handlerRecepcion: ComprasRecepcionOcHandler;
   let handlerFactura: ComprasRecepcionFacturaProveedorHandler;
@@ -82,16 +91,12 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
     ocId      = newId();
     lineaOcId = newId();
 
+    cuentaFactDebeId  = newId();
+    cuentaFactHaberId = newId();
+    reglaFacturaId    = newId();
+
     // ── Handlers ────────────────────────────────────────────────────────────
     handlerRecepcion = new ComprasRecepcionOcHandler();
-
-    // Para handler de factura: sin regla contable configurada → solo crea CxP
-    const mockRegla = { findByTipoEvento: () => Promise.resolve(null) };
-    const mockAsiento = { generar: () => Promise.resolve({ id: newId() }) };
-    handlerFactura = new ComprasRecepcionFacturaProveedorHandler(
-      mockRegla as never,
-      mockAsiento as never,
-    );
 
     // ── Tenant 1 ─────────────────────────────────────────────────────────────
     await adminPool.query(
@@ -174,6 +179,33 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
       [insumoId, tenantId, umId, SYSTEM_USER_ID],
     );
 
+    // ── Cuentas contables para recepcion_factura_proveedor ───────────────────
+    await adminPool.query(
+      `INSERT INTO cuenta_contable (id, tenant_id, empresa_id, codigo, nombre, tipo, naturaleza, nivel, es_movimiento, activo, created_by, updated_by)
+       VALUES ($1,$2,$3,'5101','Costo de obras en proceso','gasto','deudora',3,true,true,$4,$4),
+              ($5,$2,$3,'2101','Cuentas por Pagar Proveedores','pasivo','acreedora',3,true,true,$4,$4)`,
+      [cuentaFactDebeId, tenantId, empresaId, SYSTEM_USER_ID, cuentaFactHaberId],
+    );
+
+    // ── Regla contable para recepcion_factura_proveedor ──────────────────────
+    const reglaFacturaCfg: ConfiguracionRegla = {
+      lineas: [
+        { tipo: 'debito',  cuentaCodigo: '5101', descripcion: 'Costo obra proveedor' },
+        { tipo: 'credito', cuentaCodigo: '2101', descripcion: 'CxP proveedor' },
+      ],
+    };
+    await adminPool.query(
+      `INSERT INTO regla_contable (id, tenant_id, empresa_id, tipo_evento, nombre, configuracion, prioridad, activo, created_by, updated_by)
+       VALUES ($1,$2,$3,'recepcion_factura_proveedor','Factura proveedor C2 test',$4::jsonb,0,true,$5,$5)`,
+      [reglaFacturaId, tenantId, empresaId, JSON.stringify(reglaFacturaCfg), SYSTEM_USER_ID],
+    );
+
+    // ── Servicios reales y handler de factura con regla ──────────────────────
+    const realReglaSvc   = new ReglaContableService();
+    const cuentaSvc      = new CuentaContableService(null as never);
+    const realAsientoSvc = new AsientoContableService(null as never, cuentaSvc);
+    handlerFactura = new ComprasRecepcionFacturaProveedorHandler(realReglaSvc, realAsientoSvc);
+
     // ── ejecucion_partida con comprometido = 600.0000 ────────────────────────
     await adminPool.query(
       `INSERT INTO ejecucion_partida (id, tenant_id, partida_id, comprometido, devengado, moneda, ultima_actualizacion, created_by, updated_by)
@@ -229,10 +261,14 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
     await adminPool.query(`DELETE FROM proyecto WHERE tenant_id IN ($1,$2)`, [tenantId, t2]);
     await adminPool.query(`ALTER TABLE proyecto ENABLE TRIGGER no_delete_proyecto`);
     await adminPool.query(`DELETE FROM tercero WHERE tenant_id IN ($1,$2)`, [tenantId, t2]);
+    await adminPool.query(`DELETE FROM linea_asiento WHERE tenant_id IN ($1,$2)`, [tenantId, t2]);
+    await adminPool.query(`DELETE FROM asiento_contable WHERE tenant_id IN ($1,$2)`, [tenantId, t2]);
     await adminPool.query(`DELETE FROM outbox WHERE tenant_id IN ($1,$2)`, [tenantId, t2]);
     await adminPool.query(`ALTER TABLE evento_operativo DISABLE TRIGGER enforce_append_only_evento_operativo`);
     await adminPool.query(`DELETE FROM evento_operativo WHERE tenant_id IN ($1,$2)`, [tenantId, t2]);
     await adminPool.query(`ALTER TABLE evento_operativo ENABLE TRIGGER enforce_append_only_evento_operativo`);
+    await adminPool.query(`DELETE FROM regla_contable WHERE tenant_id IN ($1,$2)`, [tenantId, t2]);
+    await adminPool.query(`DELETE FROM cuenta_contable WHERE tenant_id IN ($1,$2)`, [tenantId, t2]);
     await adminPool.query(`ALTER TABLE centro_costo DISABLE TRIGGER no_delete_centro_costo`);
     await adminPool.query(`DELETE FROM centro_costo WHERE tenant_id IN ($1,$2)`, [tenantId, t2]);
     await adminPool.query(`ALTER TABLE centro_costo ENABLE TRIGGER no_delete_centro_costo`);
@@ -523,11 +559,9 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
 
   // ─── CxP automática ──────────────────────────────────────────────────────
 
-  it('12. recepcion_factura_proveedor handler → CxP creada con monto correcto', async () => {
-    const { eventoId } = await insertFacturaConEvento({
-      monto: '5000.0000',
-      ncf: 'E4100000002',
-    });
+  it('12. recepcion_factura_proveedor handler → CxP creada + asiento DEBE/HABER exactos', async () => {
+    const monto = '5000.0000';
+    const { eventoId } = await insertFacturaConEvento({ monto, ncf: 'E4100000002' });
 
     const [evento] = await adminDb
       .select()
@@ -535,24 +569,46 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
       .where(eq(schema.eventosOperativos.id, eventoId))
       .limit(1);
 
-    await handlerFactura.ejecutar({ evento: evento!, tx: adminDb });
+    await adminDb.transaction(async (tx) => {
+      await handlerFactura.ejecutar({ evento: evento!, tx: tx as never });
+    });
 
-    const { rows } = await adminPool.query(
-      `SELECT monto_original, estado, evento_origen_id
+    // CxP creada con monto correcto
+    const { rows: cxpRows } = await adminPool.query(
+      `SELECT monto_original, estado, evento_origen_id, asiento_id
        FROM cuenta_por_pagar WHERE tenant_id = $1 AND evento_origen_id = $2`,
       [tenantId, eventoId],
     );
+    expect(cxpRows.length).toBe(1);
+    expect(new Decimal(cxpRows[0]!.monto_original as string).toFixed(4)).toBe(monto);
+    expect(cxpRows[0]!.estado).toBe('PENDIENTE');
 
-    expect(rows.length).toBe(1);
-    expect(new Decimal(rows[0]!.monto_original as string).toFixed(4)).toBe('5000.0000');
-    expect(rows[0]!.estado).toBe('PENDIENTE');
+    // Asiento contable generado y vinculado a la CxP
+    const asientoId = cxpRows[0]!.asiento_id as string;
+    expect(asientoId).toBeTruthy();
+
+    const { rows: lineas } = await adminPool.query(
+      `SELECT tipo, importe, cuenta_id
+       FROM linea_asiento WHERE asiento_id = $1 ORDER BY tipo`,
+      [asientoId],
+    );
+    expect(lineas).toHaveLength(2);
+
+    const debe  = lineas.find((l) => l.tipo === 'debe')!;
+    const haber = lineas.find((l) => l.tipo === 'haber')!;
+    expect(new Decimal(debe.importe as string).toFixed(4)).toBe(monto);
+    expect(new Decimal(haber.importe as string).toFixed(4)).toBe(monto);
+    // Σdebe = Σhaber (partida doble)
+    expect(new Decimal(debe.importe as string).toFixed(4))
+      .toBe(new Decimal(haber.importe as string).toFixed(4));
+    // Cuentas correctas: DEBE=5101 (cuentaFactDebeId), HABER=2101 (cuentaFactHaberId)
+    expect(debe.cuenta_id).toBe(cuentaFactDebeId);
+    expect(haber.cuenta_id).toBe(cuentaFactHaberId);
   });
 
-  it('13. recepcion_factura_proveedor handler → evento_origen_id enlazado en CxP', async () => {
-    const { eventoId } = await insertFacturaConEvento({
-      monto: '3000.0000',
-      ncf: 'E4100000003',
-    });
+  it('13. recepcion_factura_proveedor handler → evento_origen_id enlazado + asiento vinculado', async () => {
+    const monto = '3000.0000';
+    const { eventoId } = await insertFacturaConEvento({ monto, ncf: 'E4100000003' });
 
     const [evento] = await adminDb
       .select()
@@ -560,16 +616,31 @@ describe('Compras II — Recepción OC → Factura → CxP → Scoring', () => {
       .where(eq(schema.eventosOperativos.id, eventoId))
       .limit(1);
 
-    await handlerFactura.ejecutar({ evento: evento!, tx: adminDb });
+    await adminDb.transaction(async (tx) => {
+      await handlerFactura.ejecutar({ evento: evento!, tx: tx as never });
+    });
 
     const { rows } = await adminPool.query(
-      `SELECT evento_origen_id FROM cuenta_por_pagar
+      `SELECT evento_origen_id, asiento_id FROM cuenta_por_pagar
        WHERE tenant_id = $1 AND evento_origen_id = $2`,
       [tenantId, eventoId],
     );
-
     expect(rows.length).toBe(1);
     expect(rows[0]!.evento_origen_id).toBe(eventoId);
+    // Asiento vinculado (no null) — confirma que no pasó por el camino del skip
+    expect(rows[0]!.asiento_id).toBeTruthy();
+
+    // Verificar Σdebe = Σhaber
+    const { rows: lineas } = await adminPool.query(
+      `SELECT tipo, SUM(importe::numeric) AS total
+       FROM linea_asiento WHERE asiento_id = $1
+       GROUP BY tipo ORDER BY tipo`,
+      [rows[0]!.asiento_id],
+    );
+    const sumDebe  = lineas.find((l) => l.tipo === 'debe')!.total as string;
+    const sumHaber = lineas.find((l) => l.tipo === 'haber')!.total as string;
+    expect(new Decimal(sumDebe).toFixed(4)).toBe(new Decimal(sumHaber).toFixed(4));
+    expect(new Decimal(sumDebe).toFixed(4)).toBe(monto);
   });
 
   // ─── Anticipos ───────────────────────────────────────────────────────────

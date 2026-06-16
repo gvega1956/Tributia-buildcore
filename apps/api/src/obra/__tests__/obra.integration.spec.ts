@@ -227,24 +227,16 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
       { id: reglaHoraEquipoId,   tenantId, empresaId, tipoEvento: 'hora_equipo',   nombre: 'Eq obra test', configuracion: reglaEquipoCfg,   prioridad: 0, activo: true, createdBy: uid, updatedBy: uid },
     ]);
 
-    // Servicios reales de contabilidad (usados en tests 06 y 08)
+    // Servicios reales de contabilidad — usados en todos los tests de hora_personal/hora_equipo.
+    // Las reglas seeded en beforeAll garantizan que los handlers encuentren la regla.
     realReglaSvc   = new ReglaContableService();
     const cuentaSvc = new CuentaContableService(null as never);
     realAsientoSvc  = new AsientoContableService(null as never, cuentaSvc);
 
-    // Handlers (sin deps de NestJS — instanciación directa igual que en sesiones anteriores)
-    handlerAvance = new ObraAvancePartidaHandler();
-
-    const mockRegla = { findByTipoEvento: () => Promise.resolve(null) };
-    const mockAsiento = { generar: () => Promise.resolve({ id: newId() }) };
-    handlerMo = new ObraHoraPersonalHandler(
-      mockRegla as unknown as ReglaContableService,
-      mockAsiento as unknown as AsientoContableService,
-    );
-    handlerEquipo = new ObraHoraEquipoHandler(
-      mockRegla as unknown as ReglaContableService,
-      mockAsiento as unknown as AsientoContableService,
-    );
+    // Handlers (sin deps de NestJS — instanciación directa)
+    handlerAvance  = new ObraAvancePartidaHandler();
+    handlerMo      = new ObraHoraPersonalHandler(realReglaSvc, realAsientoSvc);
+    handlerEquipo  = new ObraHoraEquipoHandler(realReglaSvc, realAsientoSvc);
 
     // Servicios para tests de integración de alto nivel
     const dbSvc = { pool: adminDb, tx: adminDb } as unknown as DbService;
