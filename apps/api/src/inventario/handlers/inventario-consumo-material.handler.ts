@@ -41,12 +41,14 @@ export class InventarioConsumoMaterialHandler implements ProjectionHandler {
     const costoTotal = cantidad.mul(wac).toFixed(4);
 
     // Actualizar stock (WAC no cambia en consumo)
+    const now = new Date();
     if (stockActual) {
       await tx
         .update(stockAlmacen)
         .set({
           cantidad: nuevaCantidad.toFixed(4),
-          updatedAt: new Date(),
+          updatedAt: now,
+          updatedBy: evento.createdBy,
         })
         .where(eq(stockAlmacen.id, stockActual.id));
     } else {
@@ -58,7 +60,10 @@ export class InventarioConsumoMaterialHandler implements ProjectionHandler {
         cantidad: nuevaCantidad.toFixed(4),
         costoPorUnitario: wac.toFixed(4),
         moneda: payload.costoUnitario.currency,
-        updatedAt: new Date(),
+        createdAt: now,
+        createdBy: evento.createdBy,
+        updatedAt: now,
+        updatedBy: evento.createdBy,
       });
     }
 

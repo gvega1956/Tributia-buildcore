@@ -40,11 +40,12 @@ export class InventarioTransferenciaAlmacenHandler implements ProjectionHandler 
     }
 
     // Decrementar origen
+    const now = new Date();
     const nuevaCantidadOrigen = cantidadOrigen.minus(cantidad);
     if (stockOrigen) {
       await tx
         .update(stockAlmacen)
-        .set({ cantidad: nuevaCantidadOrigen.toFixed(4), updatedAt: new Date() })
+        .set({ cantidad: nuevaCantidadOrigen.toFixed(4), updatedAt: now, updatedBy: evento.createdBy })
         .where(eq(stockAlmacen.id, stockOrigen.id));
     }
 
@@ -75,7 +76,8 @@ export class InventarioTransferenciaAlmacenHandler implements ProjectionHandler 
         .set({
           cantidad: nuevaCantidadDestino.toFixed(4),
           costoPorUnitario: nuevoWacDestino.toFixed(4),
-          updatedAt: new Date(),
+          updatedAt: now,
+          updatedBy: evento.createdBy,
         })
         .where(eq(stockAlmacen.id, stockDestino.id));
     } else {
@@ -87,7 +89,10 @@ export class InventarioTransferenciaAlmacenHandler implements ProjectionHandler 
         cantidad: nuevaCantidadDestino.toFixed(4),
         costoPorUnitario: wacOrigen.toFixed(4),
         moneda,
-        updatedAt: new Date(),
+        createdAt: now,
+        createdBy: evento.createdBy,
+        updatedAt: now,
+        updatedBy: evento.createdBy,
       });
     }
 

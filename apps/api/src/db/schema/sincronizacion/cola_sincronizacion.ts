@@ -100,6 +100,12 @@ export const colaSincronizacion = pgTable(
       .default(sql`now()`),
 
     createdBy: uuid('created_by').notNull(),
+
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+
+    updatedBy: uuid('updated_by').notNull().default('00000000-0000-7000-0000-000000000000'),
   },
   (t) => ({
     idempotencyUniq: uniqueIndex('cola_sync_idempotency_uniq').on(t.tenantId, t.idempotencyKey),

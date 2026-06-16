@@ -195,11 +195,14 @@ export class SyncService {
 
     if (prioridadNuevo > prioridadExistente) {
       // Nuevo gana: marcar rival como ANULADO_POR_CONFLICTO
+      const now = new Date();
       await this.db.tx
         .update(colaSincronizacion)
         .set({
           estado: 'ANULADO_POR_CONFLICTO',
           conflictoDetalle: `Anulado por operación con rol ${op.rolUsuario} (prioridad ${prioridadNuevo} > ${prioridadExistente})`,
+          updatedAt: now,
+          updatedBy: usuarioId,
         })
         .where(eq(colaSincronizacion.id, rival.id));
 
@@ -240,6 +243,8 @@ export class SyncService {
       conflictoDetalle: conflictoDetalle,
       createdAt: now,
       createdBy: usuarioId || SYSTEM_USER_ID,
+      updatedAt: now,
+      updatedBy: usuarioId || SYSTEM_USER_ID,
     });
     return id;
   }
@@ -294,13 +299,16 @@ export class SyncService {
    * Marca una operación de la cola como PROCESADO.
    * Llamado por SyncWorkerService luego de ejecutar el evento en el ledger.
    */
-  async marcarProcesado(colaId: string, eventoLedgerId: string): Promise<void> {
+  async marcarProcesado(colaId: string, eventoLedgerId: string, usuarioId?: string): Promise<void> {
+    const now = new Date();
     await this.db.tx
       .update(colaSincronizacion)
       .set({
         estado: 'PROCESADO',
         eventoLedgerId,
-        procesadoEn: new Date(),
+        procesadoEn: now,
+        updatedAt: now,
+        updatedBy: usuarioId ?? '00000000-0000-7000-0000-000000000000',
       })
       .where(eq(colaSincronizacion.id, colaId));
   }
@@ -308,12 +316,15 @@ export class SyncService {
   /**
    * Marca una operación como ERROR (fallo en la ejecución del ledger).
    */
-  async marcarError(colaId: string, detalle: string): Promise<void> {
+  async marcarError(colaId: string, detalle: string, usuarioId?: string): Promise<void> {
+    const now = new Date();
     await this.db.tx
       .update(colaSincronizacion)
       .set({
         estado: 'ERROR',
         conflictoDetalle: detalle,
+        updatedAt: now,
+        updatedBy: usuarioId ?? '00000000-0000-7000-0000-000000000000',
       })
       .where(eq(colaSincronizacion.id, colaId));
   }

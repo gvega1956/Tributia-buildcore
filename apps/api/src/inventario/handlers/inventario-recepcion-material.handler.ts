@@ -39,6 +39,7 @@ export class InventarioRecepcionMaterialHandler implements ProjectionHandler {
     const costoTotal = cantidad.mul(costoUnitario).toFixed(4);
 
     // Upsert stock_almacen
+    const now = new Date();
     if (stockActual) {
       await tx
         .update(stockAlmacen)
@@ -46,7 +47,8 @@ export class InventarioRecepcionMaterialHandler implements ProjectionHandler {
           cantidad: nuevaCantidad.toFixed(4),
           costoPorUnitario: nuevoWac.toFixed(4),
           moneda: payload.costoUnitario.currency,
-          updatedAt: new Date(),
+          updatedAt: now,
+          updatedBy: evento.createdBy,
         })
         .where(eq(stockAlmacen.id, stockActual.id));
     } else {
@@ -58,7 +60,10 @@ export class InventarioRecepcionMaterialHandler implements ProjectionHandler {
         cantidad: nuevaCantidad.toFixed(4),
         costoPorUnitario: nuevoWac.toFixed(4),
         moneda: payload.costoUnitario.currency,
-        updatedAt: new Date(),
+        createdAt: now,
+        createdBy: evento.createdBy,
+        updatedAt: now,
+        updatedBy: evento.createdBy,
       });
     }
 

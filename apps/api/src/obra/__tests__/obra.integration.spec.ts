@@ -37,7 +37,9 @@ import { DbService } from '../../database/db.service.js';
 import { LedgerService } from '../../ledger/ledger.service.js';
 import { ProjectionEngineService } from '../../ledger/projection-engine.service.js';
 import { ReglaContableService } from '../../contabilidad/regla-contable.service.js';
+import { CuentaContableService } from '../../contabilidad/cuenta-contable.service.js';
 import { AsientoContableService } from '../../contabilidad/asiento-contable.service.js';
+import type { ConfiguracionRegla } from '@tributia/contabilidad';
 
 // ─── Conexiones ───────────────────────────────────────────────────────────────
 const ADMIN_URL =
@@ -63,10 +65,22 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
   let unidadId: string;
   let clienteId: string;
 
+  // Fixtures contables (para tests 06 y 08)
+  let cuentaMoDebeId: string;   // 6201 Costo MO Obra
+  let cuentaMoHaberId: string;  // 2110 MO por Pagar
+  let cuentaEqDebeId: string;   // 6202 Costo Equipos
+  let cuentaEqHaberId: string;  // 1503 Depreciación Equipos
+  let reglaHoraPersonalId: string;
+  let reglaHoraEquipoId: string;
+
   // Handlers bajo prueba
   let handlerAvance: ObraAvancePartidaHandler;
   let handlerMo: ObraHoraPersonalHandler;
   let handlerEquipo: ObraHoraEquipoHandler;
+
+  // Servicios reales para tests de asiento (06, 08)
+  let realReglaSvc: ReglaContableService;
+  let realAsientoSvc: AsientoContableService;
 
   // Servicios bajo prueba
   let parteDiarioSvc: ParteDiarioService;
@@ -109,6 +123,13 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
     equipoId   = newId();
     unidadId   = newId();
     clienteId  = newId();
+
+    cuentaMoDebeId     = newId();
+    cuentaMoHaberId    = newId();
+    cuentaEqDebeId     = newId();
+    cuentaEqHaberId    = newId();
+    reglaHoraPersonalId = newId();
+    reglaHoraEquipoId   = newId();
 
     const uid = SYSTEM_USER_ID;
     const now = new Date();
@@ -180,6 +201,37 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
       },
     ]);
 
+    // Cuentas contables para tests 06/08
+    await adminDb.insert(schema.cuentasContables).values([
+      { id: cuentaMoDebeId,  tenantId, empresaId, codigo: '6201',   nombre: 'Costo MO Obra',          tipo: 'costo',  naturaleza: 'deudora',   nivel: 3, esMovimiento: true, activo: true, createdBy: uid, updatedBy: uid },
+      { id: cuentaMoHaberId, tenantId, empresaId, codigo: '2110',   nombre: 'MO por Pagar',            tipo: 'pasivo', naturaleza: 'acreedora', nivel: 3, esMovimiento: true, activo: true, createdBy: uid, updatedBy: uid },
+      { id: cuentaEqDebeId,  tenantId, empresaId, codigo: '6202',   nombre: 'Costo Equipos Obra',      tipo: 'costo',  naturaleza: 'deudora',   nivel: 3, esMovimiento: true, activo: true, createdBy: uid, updatedBy: uid },
+      { id: cuentaEqHaberId, tenantId, empresaId, codigo: '1503',   nombre: 'Depreciacion Equipos',    tipo: 'activo', naturaleza: 'acreedora', nivel: 3, esMovimiento: true, activo: true, createdBy: uid, updatedBy: uid },
+    ]);
+
+    // Reglas contables para hora_personal y hora_equipo
+    const reglaPersonalCfg: ConfiguracionRegla = {
+      lineas: [
+        { tipo: 'debito',  cuentaCodigo: '6201', descripcion: 'Costo MO obra' },
+        { tipo: 'credito', cuentaCodigo: '2110', descripcion: 'MO por pagar' },
+      ],
+    };
+    const reglaEquipoCfg: ConfiguracionRegla = {
+      lineas: [
+        { tipo: 'debito',  cuentaCodigo: '6202', descripcion: 'Costo equipo' },
+        { tipo: 'credito', cuentaCodigo: '1503', descripcion: 'Deprec. equipo' },
+      ],
+    };
+    await adminDb.insert(schema.reglasContables).values([
+      { id: reglaHoraPersonalId, tenantId, empresaId, tipoEvento: 'hora_personal', nombre: 'MO obra test', configuracion: reglaPersonalCfg, prioridad: 0, activo: true, createdBy: uid, updatedBy: uid },
+      { id: reglaHoraEquipoId,   tenantId, empresaId, tipoEvento: 'hora_equipo',   nombre: 'Eq obra test', configuracion: reglaEquipoCfg,   prioridad: 0, activo: true, createdBy: uid, updatedBy: uid },
+    ]);
+
+    // Servicios reales de contabilidad (usados en tests 06 y 08)
+    realReglaSvc   = new ReglaContableService();
+    const cuentaSvc = new CuentaContableService(null as never);
+    realAsientoSvc  = new AsientoContableService(null as never, cuentaSvc);
+
     // Handlers (sin deps de NestJS — instanciación directa igual que en sesiones anteriores)
     handlerAvance = new ObraAvancePartidaHandler();
 
@@ -231,9 +283,13 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
     await adminPool.query(`DELETE FROM parte_diario WHERE tenant_id = $1 OR tenant_id = $2`, [tenantId, t2]);
     await adminPool.query(`DELETE FROM outbox WHERE tenant_id = $1`, [tenantId]);
     await adminPool.query(`DELETE FROM ejecucion_partida WHERE tenant_id = $1`, [tenantId]);
+    await adminPool.query(`DELETE FROM linea_asiento WHERE tenant_id = $1`, [tenantId]);
+    await adminPool.query(`DELETE FROM asiento_contable WHERE tenant_id = $1`, [tenantId]);
     await adminPool.query(`ALTER TABLE evento_operativo DISABLE TRIGGER enforce_append_only_evento_operativo`);
     await adminPool.query(`DELETE FROM evento_operativo WHERE tenant_id = $1`, [tenantId]);
     await adminPool.query(`ALTER TABLE evento_operativo ENABLE TRIGGER enforce_append_only_evento_operativo`);
+    await adminPool.query(`DELETE FROM regla_contable WHERE tenant_id = $1`, [tenantId]);
+    await adminPool.query(`DELETE FROM cuenta_contable WHERE tenant_id = $1`, [tenantId]);
     await adminPool.query(`DELETE FROM equipo_catalogo WHERE tenant_id = $1`, [tenantId]);
     await adminPool.query(`DELETE FROM partida WHERE tenant_id = $1 OR tenant_id = $2`, [tenantId, t2]);
     await adminPool.query(`DELETE FROM unidad_medida WHERE tenant_id = $1`, [tenantId]);
@@ -488,32 +544,10 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
     expect(new Decimal(ep!.devengado).toFixed(4)).toBe('4000.0000');
   });
 
-  // ── TEST 06: hora_personal genera asiento si hay regla ────────────────────
-  it('06. hora_personal handler: genera asiento contable cuando existe regla', async () => {
-    let asientoGenerado = false;
-
-    const mockReglaConRegla = {
-      findByTipoEvento: () => Promise.resolve({
-        id: newId(),
-        configuracion: {
-          lineas: [
-            { cuentaCodigo: '6201', tipo: 'debito' },
-            { cuentaCodigo: '2110', tipo: 'credito' },
-          ],
-        },
-      }),
-    };
-    const mockAsientoEspiona = {
-      generar: () => {
-        asientoGenerado = true;
-        return Promise.resolve({ id: newId() });
-      },
-    };
-
-    const handlerConRegla = new ObraHoraPersonalHandler(
-      mockReglaConRegla as unknown as ReglaContableService,
-      mockAsientoEspiona as unknown as AsientoContableService,
-    );
+  // ── TEST 06: hora_personal genera asiento con importe exacto ─────────────
+  it('06. hora_personal handler: asiento generado con importe = costoTotal (2400)', async () => {
+    const costoTotal = '2400.0000';
+    const handlerConRegla = new ObraHoraPersonalHandler(realReglaSvc, realAsientoSvc);
 
     const eventoId = newId();
     const payload = {
@@ -521,7 +555,7 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
       proyectoId, partidaId,
       nombre: 'María López', tipo: 'PROPIO' as const, empleadoId: null,
       horasTrabajadas: '4.0000', tarifaHoraria: '600.0000',
-      moneda: 'DOP' as const, costoTotal: '2400.0000',
+      moneda: 'DOP' as const, costoTotal,
     };
 
     const evento = makeEvento({ id: eventoId, tipoEvento: 'hora_personal', payload });
@@ -537,7 +571,26 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
       await handlerConRegla.ejecutar({ evento: evento as never, tx: tx as never });
     });
 
-    expect(asientoGenerado).toBe(true);
+    // Verificar asiento en DB — NO solo presencia, sino importe exacto
+    const [asiento] = await adminDb
+      .select()
+      .from(schema.asientosContables)
+      .where(and(
+        eq(schema.asientosContables.tenantId, tenantId),
+        eq(schema.asientosContables.eventoId, eventoId),
+      ));
+    expect(asiento).toBeDefined();
+
+    const lineas = await adminDb
+      .select()
+      .from(schema.lineasAsiento)
+      .where(eq(schema.lineasAsiento.asientoId, asiento!.id));
+
+    expect(lineas).toHaveLength(2);
+    const debe  = lineas.find((l) => l.tipo === 'debe');
+    const haber = lineas.find((l) => l.tipo === 'haber');
+    expect(new Decimal(debe!.importe).toFixed(4)).toBe(costoTotal);
+    expect(new Decimal(haber!.importe).toFixed(4)).toBe(costoTotal);
   });
 
   // ── TEST 07: hora_equipo: devengado incrementa ────────────────────────────
@@ -594,29 +647,10 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
     expect(new Decimal(ep!.devengado).toFixed(4)).toBe('90000.0000');
   });
 
-  // ── TEST 08: hora_equipo genera asiento si hay regla ─────────────────────
-  it('08. hora_equipo handler: genera asiento contable cuando existe regla', async () => {
-    let asientoGenerado = false;
-
-    const mockReglaConRegla = {
-      findByTipoEvento: () => Promise.resolve({
-        id: newId(),
-        configuracion: {
-          lineas: [
-            { cuentaCodigo: '6202', tipo: 'debito' },
-            { cuentaCodigo: '1503', tipo: 'credito' },
-          ],
-        },
-      }),
-    };
-    const mockAsientoEspiona = {
-      generar: () => { asientoGenerado = true; return Promise.resolve({ id: newId() }); },
-    };
-
-    const handlerConRegla = new ObraHoraEquipoHandler(
-      mockReglaConRegla as unknown as ReglaContableService,
-      mockAsientoEspiona as unknown as AsientoContableService,
-    );
+  // ── TEST 08: hora_equipo genera asiento con importe exacto ──────────────
+  it('08. hora_equipo handler: asiento generado con importe = costoTotal (45000)', async () => {
+    const costoTotal = '45000.0000';
+    const handlerConRegla = new ObraHoraEquipoHandler(realReglaSvc, realAsientoSvc);
 
     const eventoId = newId();
     const payload = {
@@ -624,7 +658,7 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
       proyectoId, partidaId, equipoId,
       nombreEquipo: 'Excavadora CAT-320',
       horasOperadas: '3.0000', tarifaHoraria: '15000.0000',
-      moneda: 'DOP' as const, costoTotal: '45000.0000',
+      moneda: 'DOP' as const, costoTotal,
     };
 
     const evento = makeEvento({ id: eventoId, tipoEvento: 'hora_equipo', payload });
@@ -640,7 +674,26 @@ describe('Obra — Parte Diario, Avance Físico, MO y Equipos', () => {
       await handlerConRegla.ejecutar({ evento: evento as never, tx: tx as never });
     });
 
-    expect(asientoGenerado).toBe(true);
+    // Verificar asiento en DB — importe exacto, no solo presencia
+    const [asiento] = await adminDb
+      .select()
+      .from(schema.asientosContables)
+      .where(and(
+        eq(schema.asientosContables.tenantId, tenantId),
+        eq(schema.asientosContables.eventoId, eventoId),
+      ));
+    expect(asiento).toBeDefined();
+
+    const lineas = await adminDb
+      .select()
+      .from(schema.lineasAsiento)
+      .where(eq(schema.lineasAsiento.asientoId, asiento!.id));
+
+    expect(lineas).toHaveLength(2);
+    const debe  = lineas.find((l) => l.tipo === 'debe');
+    const haber = lineas.find((l) => l.tipo === 'haber');
+    expect(new Decimal(debe!.importe).toFixed(4)).toBe(costoTotal);
+    expect(new Decimal(haber!.importe).toFixed(4)).toBe(costoTotal);
   });
 
   // ── TEST 09: ParteDiarioService.crear() idempotente ──────────────────────

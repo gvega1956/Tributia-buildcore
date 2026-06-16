@@ -9,6 +9,7 @@ import { NotificacionAsincronaHandler } from './handlers/notificacion-asincrona.
 import { ContabilidadConsumoMaterialHandler } from '../contabilidad/handlers/contabilidad-consumo-material.handler.js';
 import { ContabilidadRecepcionMaterialHandler } from '../contabilidad/handlers/contabilidad-recepcion-material.handler.js';
 import { ContabilidadAjusteInventarioHandler } from '../contabilidad/handlers/contabilidad-ajuste-inventario.handler.js';
+import { ContabilidadPagoEmitidoHandler } from '../contabilidad/handlers/contabilidad-pago-emitido.handler.js';
 import { InventarioRecepcionMaterialHandler } from '../inventario/handlers/inventario-recepcion-material.handler.js';
 import { InventarioConsumoMaterialHandler } from '../inventario/handlers/inventario-consumo-material.handler.js';
 import { InventarioTransferenciaAlmacenHandler } from '../inventario/handlers/inventario-transferencia-almacen.handler.js';
@@ -41,6 +42,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
     ObraHoraEquipoHandler,
     OrdenCambioAprobadaHandler,
     PagoEjecucionPartidaHandler,
+    ContabilidadPagoEmitidoHandler,
     {
       provide: PROJECTION_HANDLER_TOKEN,
       useFactory: (
@@ -49,6 +51,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         contabConsumo: ContabilidadConsumoMaterialHandler,
         contabRecepcion: ContabilidadRecepcionMaterialHandler,
         contabAjuste: ContabilidadAjusteInventarioHandler,
+        contabPago: ContabilidadPagoEmitidoHandler,
         invRecepcion: InventarioRecepcionMaterialHandler,
         invConsumo: InventarioConsumoMaterialHandler,
         invTransferencia: InventarioTransferenciaAlmacenHandler,
@@ -67,6 +70,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         contabConsumo,
         contabRecepcion,
         contabAjuste,
+        contabPago,
         invRecepcion,
         invConsumo,
         invTransferencia,
@@ -86,6 +90,7 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         ContabilidadConsumoMaterialHandler,
         ContabilidadRecepcionMaterialHandler,
         ContabilidadAjusteInventarioHandler,
+        ContabilidadPagoEmitidoHandler,
         InventarioRecepcionMaterialHandler,
         InventarioConsumoMaterialHandler,
         InventarioTransferenciaAlmacenHandler,

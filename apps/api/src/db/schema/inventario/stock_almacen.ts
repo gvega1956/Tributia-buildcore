@@ -3,15 +3,14 @@ import {
   uuid,
   numeric,
   varchar,
-  timestamp,
   uniqueIndex,
   index,
 } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
 import { newId } from '@tributia/shared';
 import { tenants } from '../core/tenant.js';
 import { almacenes } from './almacen.js';
 import { insumos } from '../catalogos/insumo.js';
+import { auditColumns } from '../core/audit.js';
 
 /**
  * stock_almacen — proyección de stock actual por (almacen, insumo).
@@ -46,9 +45,7 @@ export const stockAlmacen = pgTable(
       .default('0.0000'),
     moneda: varchar('moneda', { length: 3 }).notNull().default('DOP'),
 
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    ...auditColumns,
   },
   (t) => ({
     tenantIdx: index('stock_almacen_tenant_idx').on(t.tenantId),

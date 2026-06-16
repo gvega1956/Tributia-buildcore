@@ -34,12 +34,14 @@ export class InventarioAjusteInventarioHandler implements ProjectionHandler {
 
     const wac = new Decimal(stockActual?.costoPorUnitario ?? payload.costoUnitario.amount);
 
+    const now = new Date();
     if (stockActual) {
       await tx
         .update(stockAlmacen)
         .set({
           cantidad: cantidadFisica.toFixed(4),
-          updatedAt: new Date(),
+          updatedAt: now,
+          updatedBy: evento.createdBy,
         })
         .where(eq(stockAlmacen.id, stockActual.id));
     } else {
@@ -51,7 +53,10 @@ export class InventarioAjusteInventarioHandler implements ProjectionHandler {
         cantidad: cantidadFisica.toFixed(4),
         costoPorUnitario: wac.toFixed(4),
         moneda: payload.costoUnitario.currency,
-        updatedAt: new Date(),
+        createdAt: now,
+        createdBy: evento.createdBy,
+        updatedAt: now,
+        updatedBy: evento.createdBy,
       });
     }
 

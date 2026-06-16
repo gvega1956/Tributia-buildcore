@@ -75,6 +75,7 @@ export class ComprasRecepcionOcHandler implements ProjectionHandler {
             costoPorUnitario: nuevoWac.toFixed(4),
             moneda: linea.moneda,
             updatedAt: now,
+            updatedBy: evento.createdBy,
           })
           .where(eq(stockAlmacen.id, stockActual.id));
       } else {
@@ -86,7 +87,10 @@ export class ComprasRecepcionOcHandler implements ProjectionHandler {
           cantidad: cantidadRecibida.toFixed(4),
           costoPorUnitario: costoUnitario.toFixed(4),
           moneda: linea.moneda,
+          createdAt: now,
+          createdBy: evento.createdBy,
           updatedAt: now,
+          updatedBy: evento.createdBy,
         });
       }
 
