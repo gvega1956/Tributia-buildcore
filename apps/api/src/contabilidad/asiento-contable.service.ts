@@ -1,9 +1,10 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { Injectable, BadRequestException, UnprocessableEntityException } from '@nestjs/common';
+import { eq, and } from 'drizzle-orm';
 import { newId } from '@tributia/shared';
 import { validarBalance, type AsientoInput, type LineaAsientoInput } from '@tributia/contabilidad';
 import { asientosContables, type AsientoContableSelect } from '../db/schema/contabilidad/asiento_contable.js';
 import { lineasAsiento } from '../db/schema/contabilidad/linea_asiento.js';
+import { periodosContables } from '../db/schema/contabilidad/periodo_contable.js';
 import { DbService } from '../database/db.service.js';
 import { CuentaContableService } from './cuenta-contable.service.js';
 import type { DbTx } from '../ledger/projection.types.js';
@@ -27,7 +28,31 @@ export class AsientoContableService {
    * Si las lineas no balancean → BadRequestException (toda la tx se revierte,
    * incluido el evento origen — garantía de atomicidad síncrona).
    */
-  async generar(input: AsientoInput, tx: DbTx): Promise<AsientoContableSelect> {
+  async generar(input: AsientoInput, tx: DbTx, skipPeriodCheck = false): Promise<AsientoContableSelect> {
+    // Bloqueo de período cerrado (motor contable, no solo UI).
+    // Tipos manuales (ajuste, apertura) con skipPeriodCheck=true bypass en cierre de ejercicio.
+    if (!skipPeriodCheck && input.tipo !== 'apertura') {
+      const [anioStr, mesStr] = input.fecha.split('-');
+      const anio = parseInt(anioStr!, 10);
+      const mes  = parseInt(mesStr!, 10);
+      if (!isNaN(anio) && !isNaN(mes)) {
+        const [periodo] = await tx
+          .select({ estado: periodosContables.estado })
+          .from(periodosContables)
+          .where(and(
+            eq(periodosContables.empresaId, input.empresaId),
+            eq(periodosContables.anio, anio),
+            eq(periodosContables.mes, mes),
+          ))
+          .limit(1);
+        if (periodo?.estado === 'CERRADO') {
+          throw new UnprocessableEntityException(
+            `Período ${anio}-${String(mes).padStart(2, '0')} está cerrado. Reapertura requerida (permiso REAPERTURA_PERIODO).`,
+          );
+        }
+      }
+    }
+
     if (!validarBalance(input.lineas)) {
       const debe = input.lineas
         .filter((l: LineaAsientoInput) => l.tipo === 'debe')
