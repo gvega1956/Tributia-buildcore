@@ -97,7 +97,9 @@ export const eventosOperativos = pgTable(
         'recepcion_factura_proveedor','emision_factura_cliente',
         'pago_emitido','cobro_recibido','avance_subcontrato',
         'retencion_aplicada','combustible_cargado','mantenimiento_ejecutado',
-        'orden_cambio_aprobada','ajuste_inventario','evento_reversa'
+        'orden_cambio_aprobada','ajuste_inventario',
+        'emision_oc','recepcion_oc','emision_ecf',
+        'evento_reversa'
       )`,
     ),
 

@@ -95,6 +95,10 @@ export const PERMISSIONS = {
   EQUIPO_CATALOGO_WRITE: 'equipo_catalogo:write',
   CATALOGO_DGII_READ: 'catalogo_dgii:read',
 
+  // e-CF emisión (§17)
+  ECF_EMISION_READ: 'ecf_emision:read',
+  ECF_EMISION_WRITE: 'ecf_emision:write',
+
   // Sincronización offline (P7)
   SYNC_WRITE: 'sync:write',
 

@@ -22,6 +22,7 @@ import { TableroModule } from './tablero/tablero.module.js';
 import { SyncModule } from './sincronizacion/sync.module.js';
 import { ContabilidadModule } from './contabilidad/contabilidad.module.js';
 import { CxcModule } from './cxc/cxc.module.js';
+import { LocalizacionDoModule } from './localizacion-do/localizacion-do.module.js';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { CxcModule } from './cxc/cxc.module.js';
     SyncModule,
     ContabilidadModule,
     CxcModule,
+    LocalizacionDoModule,
     HealthModule,
   ],
   providers: [

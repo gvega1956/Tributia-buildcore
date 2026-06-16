@@ -10,6 +10,8 @@
  *   - avance_partida        → es físico, no financiero
  *   - transferencia_almacen → movimiento interno sin costo
  *   - orden_cambio_aprobada → ajusta presupuesto, asiento en factura posterior
+ *   - emision_ecf            → hecho fiscal/documental posterior; el asiento ya
+ *                              nació en emision_factura_cliente (ADR-0007 §7)
  */
 export const TIPOS_EVENTO_CONTABLE_REQUERIDO: ReadonlySet<string> = new Set([
   'hora_personal',

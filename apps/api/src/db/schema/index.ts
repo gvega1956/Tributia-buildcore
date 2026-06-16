@@ -60,3 +60,7 @@ export * from './sincronizacion/foto_campo.js';
 export * from './cxc/cubicacion.js';
 export * from './cxc/factura_cliente.js';
 export * from './cxc/cuenta_por_cobrar.js';
+export * from './localizacion-do/configuracion_emisor_ecf.js';
+export * from './localizacion-do/secuencia_ecf.js';
+export * from './localizacion-do/comprobante_ecf.js';
+export * from './localizacion-do/acuse_ecf.js';

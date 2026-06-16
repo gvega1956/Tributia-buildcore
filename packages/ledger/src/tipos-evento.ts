@@ -17,6 +17,7 @@ export const TIPOS_EVENTO = [
   'ajuste_inventario',
   'emision_oc',
   'recepcion_oc',
+  'emision_ecf',
   'evento_reversa',
 ] as const;
 
