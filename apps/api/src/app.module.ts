@@ -20,6 +20,7 @@ import { ObraModule } from './obra/obra.module.js';
 import { OrdenesCambioModule } from './ordenes-cambio/ordenes-cambio.module.js';
 import { TableroModule } from './tablero/tablero.module.js';
 import { SyncModule } from './sincronizacion/sync.module.js';
+import { ContabilidadModule } from './contabilidad/contabilidad.module.js';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { SyncModule } from './sincronizacion/sync.module.js';
     OrdenesCambioModule,
     TableroModule,
     SyncModule,
+    ContabilidadModule,
     HealthModule,
   ],
   providers: [
