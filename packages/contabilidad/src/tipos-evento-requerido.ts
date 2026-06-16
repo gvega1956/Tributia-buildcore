@@ -15,4 +15,5 @@ export const TIPOS_EVENTO_CONTABLE_REQUERIDO: ReadonlySet<string> = new Set([
   'hora_personal',
   'hora_equipo',
   'recepcion_factura_proveedor',
+  'emision_factura_cliente',
 ]);

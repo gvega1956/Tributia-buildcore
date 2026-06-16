@@ -55,6 +55,9 @@ const PLAN_RD: CuentaPlantilla[] = [
   { codigo: '1104',    nombre: 'Inventarios',                    tipo: 'activo',    naturaleza: 'deudora',   nivel: 3, codigoPadre: '11',      esMovimiento: false },
   { codigo: '1104.01', nombre: 'Inventario de Materiales',       tipo: 'activo',    naturaleza: 'deudora',   nivel: 4, codigoPadre: '1104',    esMovimiento: true  },
   { codigo: '1104.02', nombre: 'Herramientas y Equipos Menores', tipo: 'activo',    naturaleza: 'deudora',   nivel: 4, codigoPadre: '1104',    esMovimiento: true  },
+  { codigo: '1105',    nombre: 'Retenciones Sufridas por Cobrar', tipo: 'activo',   naturaleza: 'deudora',   nivel: 3, codigoPadre: '11',      esMovimiento: false },
+  { codigo: '1105.01', nombre: 'ISR Retenido por Clientes 5%',   tipo: 'activo',    naturaleza: 'deudora',   nivel: 4, codigoPadre: '1105',    esMovimiento: true  },
+  { codigo: '1105.02', nombre: 'ITBIS Retenido por Clientes',    tipo: 'activo',    naturaleza: 'deudora',   nivel: 4, codigoPadre: '1105',    esMovimiento: true  },
   { codigo: '12',      nombre: 'Activos No Corrientes',          tipo: 'activo',    naturaleza: 'deudora',   nivel: 2, codigoPadre: '1',       esMovimiento: false },
   { codigo: '1201',    nombre: 'Propiedad, Planta y Equipo',     tipo: 'activo',    naturaleza: 'deudora',   nivel: 3, codigoPadre: '12',      esMovimiento: false },
   { codigo: '1201.01', nombre: 'Maquinaria Pesada',              tipo: 'activo',    naturaleza: 'deudora',   nivel: 4, codigoPadre: '1201',    esMovimiento: true  },
@@ -192,6 +195,64 @@ async function main(): Promise<void> {
       descripcion:
         'Registra la salida de inventario de materiales como costo de obra en proceso al consumirlos en campo.',
       configuracion,
+      prioridad: 0,
+      activo: true,
+      createdBy: SYSTEM_USER_ID,
+      updatedBy: SYSTEM_USER_ID,
+    })
+    .onConflictDoNothing();
+
+  console.log('Regla contable creada.');
+
+  // ── Regla contable: emision_factura_cliente ───────────────────────────────
+  console.log('\nCreando regla contable para emision_factura_cliente...');
+
+  const configuracionFacturaCliente: ConfiguracionRegla = {
+    lineas: [
+      {
+        tipo: 'debito',
+        cuentaCodigo: '1102.01',
+        descripcion: 'Cuenta por cobrar — neto a cobrar del cliente',
+        montoKey: 'netoACobrar',
+      },
+      {
+        tipo: 'debito',
+        cuentaCodigo: '1105.01',
+        descripcion: 'ISR retenido por el cliente (Estado) — anticipo de impuesto',
+        montoKey: 'retencionIsr',
+      },
+      {
+        tipo: 'debito',
+        cuentaCodigo: '1105.02',
+        descripcion: 'ITBIS retenido por el cliente (Estado)',
+        montoKey: 'retencionItbis',
+      },
+      {
+        tipo: 'credito',
+        cuentaCodigo: '4101.01',
+        descripcion: 'Ingreso por avance de obra certificado',
+        montoKey: 'subtotal',
+      },
+      {
+        tipo: 'credito',
+        cuentaCodigo: '2103.01',
+        descripcion: 'ITBIS cobrado a clientes',
+        montoKey: 'itbis',
+      },
+    ],
+  };
+
+  await db
+    .insert(schema.reglasContables)
+    .values({
+      id: newId(),
+      tenantId: tenant.id,
+      empresaId: empresa.id,
+      tipoEvento: 'emision_factura_cliente',
+      nombre: 'Emisión Factura Cliente → Ingreso + CxC + Retenciones',
+      descripcion:
+        'Registra el ingreso por avance de obra certificado, la CxC neta a cobrar, el ITBIS por pagar y las retenciones que el cliente (Estado) practica sobre la factura.',
+      configuracion: configuracionFacturaCliente,
       prioridad: 0,
       activo: true,
       createdBy: SYSTEM_USER_ID,

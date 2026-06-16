@@ -101,6 +101,10 @@ export const proyectos = pgTable(
       .notNull()
       .default('0.0000'),
 
+    // % de retención de garantía sobre cada cubicación, si el contrato la define (§16).
+    // NULL = el contrato no retiene garantía.
+    retencionGarantiaPct: numeric('retencion_garantia_pct', { precision: 5, scale: 2 }),
+
     ...auditColumns,
     ...softDeleteColumns,
   },

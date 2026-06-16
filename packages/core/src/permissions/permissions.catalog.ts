@@ -54,6 +54,14 @@ export const PERMISSIONS = {
   ORDEN_CAMBIO_WRITE: 'orden_cambio:write',
   ORDEN_CAMBIO_APPROVE: 'orden_cambio:approve',
 
+  // CxC: Cubicaciones y Factura al Cliente (§16)
+  CUBICACION_READ: 'cubicacion:read',
+  CUBICACION_WRITE: 'cubicacion:write',
+  FACTURA_CLI_READ: 'factura_cli:read',
+  FACTURA_CLI_WRITE: 'factura_cli:write',
+  CXC_READ: 'cxc:read',
+  CXC_WRITE: 'cxc:write',
+
   // Contabilidad
   ASIENTO_READ: 'asiento:read',
   ASIENTO_MANUAL: 'asiento:manual',

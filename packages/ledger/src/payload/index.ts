@@ -12,6 +12,7 @@ import { zPayloadEmisionOc } from './emision-oc.schema.js';
 import { zPayloadRecepcionOc } from './recepcion-oc.schema.js';
 import { zPayloadOrdenCambioAprobada } from './orden-cambio-aprobada.schema.js';
 import { zPayloadCobroRecibido } from './cobro-recibido.schema.js';
+import { zPayloadEmisionFacturaCliente } from './emision-factura-cliente.schema.js';
 
 export * from './recepcion-material.schema.js';
 export * from './consumo-material.schema.js';
@@ -26,6 +27,7 @@ export * from './emision-oc.schema.js';
 export * from './recepcion-oc.schema.js';
 export * from './orden-cambio-aprobada.schema.js';
 export * from './cobro-recibido.schema.js';
+export * from './emision-factura-cliente.schema.js';
 
 export const PAYLOAD_SCHEMAS = {
   recepcion_material: zPayloadRecepcionMaterial,
@@ -41,6 +43,7 @@ export const PAYLOAD_SCHEMAS = {
   recepcion_oc: zPayloadRecepcionOc,
   orden_cambio_aprobada: zPayloadOrdenCambioAprobada,
   cobro_recibido: zPayloadCobroRecibido,
+  emision_factura_cliente: zPayloadEmisionFacturaCliente,
 } as const satisfies Record<string, z.ZodTypeAny>;
 
 export type TipoEventoConSchema = keyof typeof PAYLOAD_SCHEMAS;

@@ -200,6 +200,9 @@ const PLAN_RD: CuentaPlantilla[] = [
   { codigo: '1104',    nombre: 'Inventarios',                     tipo: 'activo',    naturaleza: 'deudora',   nivel: 3, codigoPadre: '11',      esMovimiento: false },
   { codigo: '1104.01', nombre: 'Inventario de Materiales',        tipo: 'activo',    naturaleza: 'deudora',   nivel: 4, codigoPadre: '1104',    esMovimiento: true  },
   { codigo: '1104.02', nombre: 'Herramientas y Equipos Menores',  tipo: 'activo',    naturaleza: 'deudora',   nivel: 4, codigoPadre: '1104',    esMovimiento: true  },
+  { codigo: '1105',    nombre: 'Retenciones Sufridas por Cobrar', tipo: 'activo',    naturaleza: 'deudora',   nivel: 3, codigoPadre: '11',      esMovimiento: false },
+  { codigo: '1105.01', nombre: 'ISR Retenido por Clientes 5%',    tipo: 'activo',    naturaleza: 'deudora',   nivel: 4, codigoPadre: '1105',    esMovimiento: true  },
+  { codigo: '1105.02', nombre: 'ITBIS Retenido por Clientes',     tipo: 'activo',    naturaleza: 'deudora',   nivel: 4, codigoPadre: '1105',    esMovimiento: true  },
   { codigo: '12',      nombre: 'Activos No Corrientes',           tipo: 'activo',    naturaleza: 'deudora',   nivel: 2, codigoPadre: '1',       esMovimiento: false },
   { codigo: '1201',    nombre: 'Propiedad Planta y Equipo',       tipo: 'activo',    naturaleza: 'deudora',   nivel: 3, codigoPadre: '12',      esMovimiento: false },
   { codigo: '1201.01', nombre: 'Maquinaria Pesada',               tipo: 'activo',    naturaleza: 'deudora',   nivel: 4, codigoPadre: '1201',    esMovimiento: true  },
@@ -520,6 +523,42 @@ async function main(): Promise<void> {
   } else {
     reglaId = reglaExistente.id;
     console.log(`  · Regla contable ya existe: ${reglaId}`);
+  }
+
+  // ── 8b. Regla contable: emision_factura_cliente ────────────────────────────
+  const configuracionFacturaCliente: ConfiguracionRegla = {
+    lineas: [
+      { tipo: 'debito',  cuentaCodigo: '1102.01', descripcion: 'CxC — neto a cobrar del cliente', montoKey: 'netoACobrar' },
+      { tipo: 'debito',  cuentaCodigo: '1105.01', descripcion: 'ISR retenido por el cliente (Estado)', montoKey: 'retencionIsr' },
+      { tipo: 'debito',  cuentaCodigo: '1105.02', descripcion: 'ITBIS retenido por el cliente (Estado)', montoKey: 'retencionItbis' },
+      { tipo: 'credito', cuentaCodigo: '4101.01', descripcion: 'Ingreso por avance de obra certificado', montoKey: 'subtotal' },
+      { tipo: 'credito', cuentaCodigo: '2103.01', descripcion: 'ITBIS cobrado a clientes', montoKey: 'itbis' },
+    ],
+  };
+
+  const [reglaFacturaClienteExistente] = await db.select({ id: schema.reglasContables.id })
+    .from(schema.reglasContables)
+    .where(and(
+      eq(schema.reglasContables.empresaId, empresaPrincipal.id),
+      eq(schema.reglasContables.tipoEvento, 'emision_factura_cliente'),
+      eq(schema.reglasContables.activo, true),
+    ))
+    .limit(1);
+
+  if (!reglaFacturaClienteExistente) {
+    const reglaFacturaClienteId = newId();
+    await db.insert(schema.reglasContables).values({
+      id: reglaFacturaClienteId, tenantId, empresaId: empresaPrincipal.id,
+      tipoEvento: 'emision_factura_cliente',
+      nombre: 'Emisión Factura Cliente → Ingreso + CxC + Retenciones',
+      descripcion: 'Registra el ingreso por avance certificado, la CxC neta y las retenciones del cliente.',
+      configuracion: configuracionFacturaCliente,
+      prioridad: 0, activo: true,
+      createdBy: SYSTEM_USER_ID, updatedBy: SYSTEM_USER_ID,
+    });
+    console.log(`  ✓ Regla contable emision_factura_cliente creada: ${reglaFacturaClienteId}`);
+  } else {
+    console.log(`  · Regla contable emision_factura_cliente ya existe: ${reglaFacturaClienteExistente.id}`);
   }
 
   // ── 9. Insumos demo ────────────────────────────────────────────────────────
