@@ -18,6 +18,8 @@ export const TIPOS_EVENTO = [
   'emision_oc',
   'recepcion_oc',
   'emision_ecf',
+  'gasto_caja_chica',
+  'reposicion_caja_chica',
   'evento_reversa',
 ] as const;
 

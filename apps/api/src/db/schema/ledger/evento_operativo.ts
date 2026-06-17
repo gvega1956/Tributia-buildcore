@@ -99,6 +99,7 @@ export const eventosOperativos = pgTable(
         'retencion_aplicada','combustible_cargado','mantenimiento_ejecutado',
         'orden_cambio_aprobada','ajuste_inventario',
         'emision_oc','recepcion_oc','emision_ecf',
+        'gasto_caja_chica','reposicion_caja_chica',
         'evento_reversa'
       )`,
     ),

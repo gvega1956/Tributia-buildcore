@@ -408,6 +408,7 @@ describe('Cierre contable mensual y multimoneda', () => {
   // ─── 9. Cobro recibido misma tasa → sin diferencia cambiaria ────────────────
   it('09 — cobro a misma tasa que factura → sin asiento de diferencia cambiaria', async () => {
     const payload = {
+      cuentaBancariaId: newId(),
       facturaClienteId: null,
       montoCobrado:     { amount: '1000.0000', currency: 'USD' },
       tasaFactura:      '60.000000',
@@ -437,6 +438,7 @@ describe('Cierre contable mensual y multimoneda', () => {
   // ─── 10. Cobro a tasa mayor → asiento ganancia cambiaria ─────────────────────
   it('10 — cobro a tasa mayor → asiento ganancia cambiaria generado', async () => {
     const payload = {
+      cuentaBancariaId: newId(),
       facturaClienteId: null,
       montoCobrado:     { amount: '1000.0000', currency: 'USD' },
       tasaFactura:      '60.000000',
@@ -467,6 +469,7 @@ describe('Cierre contable mensual y multimoneda', () => {
   // ─── 11. Cobro a tasa menor → asiento pérdida cambiaria ──────────────────────
   it('11 — cobro a tasa menor → asiento pérdida cambiaria generado', async () => {
     const payload = {
+      cuentaBancariaId: newId(),
       facturaClienteId: null,
       montoCobrado:     { amount: '500.0000', currency: 'USD' },
       tasaFactura:      '61.000000',
@@ -497,6 +500,7 @@ describe('Cierre contable mensual y multimoneda', () => {
   it('12 — asiento diferencia cambiaria: Σdebe = Σhaber', async () => {
     // Diferencia = 2000 × (63 - 60) = 6000 DOP ganancia
     const payload = {
+      cuentaBancariaId: newId(),
       facturaClienteId: null,
       montoCobrado:     { amount: '2000.0000', currency: 'USD' },
       tasaFactura:      '60.000000',

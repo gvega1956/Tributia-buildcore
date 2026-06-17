@@ -23,6 +23,11 @@ import { ObraHoraEquipoHandler } from '../obra/handlers/obra-hora-equipo.handler
 import { OrdenCambioAprobadaHandler } from '../ordenes-cambio/handlers/orden-cambio-aprobada.handler.js';
 import { PagoEjecucionPartidaHandler } from '../tablero/handlers/pago-ejecucion-partida.handler.js';
 import { CxcEmisionFacturaClienteHandler } from '../cxc/handlers/cxc-emision-factura-cliente.handler.js';
+import { ContabilidadDiferenciaCambiariaHandler } from '../contabilidad/handlers/contabilidad-diferencia-cambiaria.handler.js';
+import { ContabilidadCobroRecibidoHandler } from '../contabilidad/handlers/contabilidad-cobro-recibido.handler.js';
+import { ContabilidadGastoCajaChicaHandler } from '../contabilidad/handlers/contabilidad-gasto-caja-chica.handler.js';
+import { ContabilidadReposicionCajaChicaHandler } from '../contabilidad/handlers/contabilidad-reposicion-caja-chica.handler.js';
+import { BancoMovimientoHandler } from '../tesoreria/handlers/banco-movimiento.handler.js';
 import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
 
 @Module({
@@ -45,6 +50,11 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
     PagoEjecucionPartidaHandler,
     ContabilidadPagoEmitidoHandler,
     CxcEmisionFacturaClienteHandler,
+    ContabilidadDiferenciaCambiariaHandler,
+    ContabilidadCobroRecibidoHandler,
+    ContabilidadGastoCajaChicaHandler,
+    ContabilidadReposicionCajaChicaHandler,
+    BancoMovimientoHandler,
     {
       provide: PROJECTION_HANDLER_TOKEN,
       useFactory: (
@@ -67,6 +77,11 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         ordenCambioAprobada: OrdenCambioAprobadaHandler,
         pagoEjecucionPartida: PagoEjecucionPartidaHandler,
         cxcEmisionFacturaCliente: CxcEmisionFacturaClienteHandler,
+        diferenciaFx: ContabilidadDiferenciaCambiariaHandler,
+        cobroRecibido: ContabilidadCobroRecibidoHandler,
+        gastoCajaChica: ContabilidadGastoCajaChicaHandler,
+        reposicionCajaChica: ContabilidadReposicionCajaChicaHandler,
+        bancoMovimiento: BancoMovimientoHandler,
       ) => [
         contador,
         notificacion,
@@ -87,6 +102,11 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         ordenCambioAprobada,
         pagoEjecucionPartida,
         cxcEmisionFacturaCliente,
+        diferenciaFx,
+        cobroRecibido,
+        gastoCajaChica,
+        reposicionCajaChica,
+        bancoMovimiento,
       ],
       inject: [
         ContadorSincronoHandler,
@@ -108,6 +128,11 @@ import { PROJECTION_HANDLER_TOKEN } from './projection.types.js';
         OrdenCambioAprobadaHandler,
         PagoEjecucionPartidaHandler,
         CxcEmisionFacturaClienteHandler,
+        ContabilidadDiferenciaCambiariaHandler,
+        ContabilidadCobroRecibidoHandler,
+        ContabilidadGastoCajaChicaHandler,
+        ContabilidadReposicionCajaChicaHandler,
+        BancoMovimientoHandler,
       ],
     },
     ProjectionEngineService,

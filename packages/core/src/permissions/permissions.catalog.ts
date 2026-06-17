@@ -102,6 +102,19 @@ export const PERMISSIONS = {
   // Sincronización offline (P7)
   SYNC_WRITE: 'sync:write',
 
+  // Tesorería (§16)
+  BANCO_READ: 'banco:read',
+  BANCO_WRITE: 'banco:write',
+  CONCILIACION_READ: 'conciliacion:read',
+  CONCILIACION_WRITE: 'conciliacion:write',
+  COBRO_WRITE: 'cobro:write',
+  CAJA_CHICA_READ: 'caja_chica:read',
+  CAJA_CHICA_WRITE: 'caja_chica:write',
+  REPOSICION_READ: 'reposicion:read',
+  REPOSICION_WRITE: 'reposicion:write',
+  PAGO_PROGRAMADO_READ: 'pago_programado:read',
+  PAGO_PROGRAMADO_WRITE: 'pago_programado:write',
+
   // Reportes / BI
   REPORTE_FINANCIERO: 'reporte:financiero',
   REPORTE_EJECUTIVO: 'reporte:ejecutivo',
