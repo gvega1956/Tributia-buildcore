@@ -8,9 +8,11 @@ import { CobroService } from './cobro.service.js';
 import { CajaChicaService } from './caja-chica.service.js';
 import { ReposicionCajaChicaService } from './reposicion.service.js';
 import { ProgramacionPagoService } from './programacion-pago.service.js';
+import { FlujoCajaService } from './flujo-caja.service.js';
 import { BancoController } from './banco.controller.js';
 import { ConciliacionController } from './conciliacion.controller.js';
 import { CajaChicaController } from './caja-chica.controller.js';
+import { FlujoCajaController } from './flujo-caja.controller.js';
 
 @Module({
   imports: [DatabaseModule, LedgerModule, WorkflowModule],
@@ -21,8 +23,9 @@ import { CajaChicaController } from './caja-chica.controller.js';
     CajaChicaService,
     ReposicionCajaChicaService,
     ProgramacionPagoService,
+    FlujoCajaService,
   ],
-  controllers: [BancoController, ConciliacionController, CajaChicaController],
-  exports: [BancoService, CobroService, CajaChicaService, ProgramacionPagoService],
+  controllers: [BancoController, ConciliacionController, CajaChicaController, FlujoCajaController],
+  exports: [BancoService, CobroService, CajaChicaService, ProgramacionPagoService, FlujoCajaService],
 })
 export class TesoreriaModule {}

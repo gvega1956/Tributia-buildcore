@@ -115,6 +115,10 @@ export const PERMISSIONS = {
   PAGO_PROGRAMADO_READ: 'pago_programado:read',
   PAGO_PROGRAMADO_WRITE: 'pago_programado:write',
 
+  // Flujo de caja proyectado (§16)
+  FLUJO_CAJA_READ: 'flujo_caja:read',
+  FLUJO_CAJA_WRITE: 'flujo_caja:write',
+
   // Reportes / BI
   REPORTE_FINANCIERO: 'reporte:financiero',
   REPORTE_EJECUTIVO: 'reporte:ejecutivo',
