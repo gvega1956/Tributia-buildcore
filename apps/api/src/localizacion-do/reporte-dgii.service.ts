@@ -15,6 +15,7 @@
  */
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { and, eq, gte, lte, isNull, inArray, sql } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import Decimal from 'decimal.js';
 import {
   generarReporte606,
@@ -148,6 +149,9 @@ export class ReporteDgiiService {
     const { inicio, fin } = periodoRango(anio, mes);
     const rnc = await this.rncEmpresa(tenantId, empresaId);
 
+    // Self-join para obtener el NCF del comprobante origen en ajustes (E33/E34)
+    const origenEcf = alias(comprobantesEcf, 'origen_ecf');
+
     const rows = await this.db.tx
       .select({
         ncf: comprobantesEcf.ncf,
@@ -155,17 +159,17 @@ export class ReporteDgiiService {
         fechaEmision: comprobantesEcf.fechaEmision,
         montoSubtotal: comprobantesEcf.montoSubtotal,
         montoItbis: comprobantesEcf.montoItbis,
-        comprobanteOrigenId: comprobantesEcf.comprobanteOrigenId,
         documento: comprobantesEcf.documento,
-        facturaClienteId: comprobantesEcf.facturaClienteId,
         montoRetencionIsr: facturasCliente.montoRetencionIsr,
         montoRetencionItbis: facturasCliente.montoRetencionItbis,
         rncCedula: terceros.rncCedula,
         tipoIdentificacion: terceros.tipoIdentificacion,
+        ncfOrigen: origenEcf.ncf,
       })
       .from(comprobantesEcf)
       .leftJoin(facturasCliente, eq(comprobantesEcf.facturaClienteId, facturasCliente.id))
       .leftJoin(terceros, eq(facturasCliente.clienteId, terceros.id))
+      .leftJoin(origenEcf, eq(comprobantesEcf.comprobanteOrigenId, origenEcf.id))
       .where(
         and(
           eq(comprobantesEcf.tenantId, tenantId),
@@ -189,8 +193,6 @@ export class ReporteDgiiService {
         tipoIdCliente = rncCliente.length === 9 ? '1' : '2';
       }
 
-      const ncfMod = r.comprobanteOrigenId ? undefined : undefined; // populated via origen join if needed
-
       const fila: DatosFila607 = {
         rncCedula: rncCliente,
         tipoIdentificacion: tipoIdCliente,
@@ -201,7 +203,7 @@ export class ReporteDgiiService {
         itbisRetenidoPorCliente: r.montoRetencionItbis ?? '0.0000',
         isrRetenidoPorCliente: r.montoRetencionIsr ?? '0.0000',
       };
-      if (ncfMod !== undefined) (fila as { ncfModificado?: string }).ncfModificado = ncfMod;
+      if (r.ncfOrigen) (fila as { ncfModificado?: string }).ncfModificado = r.ncfOrigen;
       return fila;
     });
 
