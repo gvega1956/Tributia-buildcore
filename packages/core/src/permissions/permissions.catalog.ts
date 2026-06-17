@@ -119,6 +119,9 @@ export const PERMISSIONS = {
   FLUJO_CAJA_READ: 'flujo_caja:read',
   FLUJO_CAJA_WRITE: 'flujo_caja:write',
 
+  // Reportes DGII (§17)
+  REPORTE_DGII_READ: 'reporte_dgii:read',
+
   // Reportes / BI
   REPORTE_FINANCIERO: 'reporte:financiero',
   REPORTE_EJECUTIVO: 'reporte:ejecutivo',

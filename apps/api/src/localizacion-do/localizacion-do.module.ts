@@ -4,12 +4,14 @@ import { LedgerModule } from '../ledger/ledger.module.js';
 import { CatalogosModule } from '../catalogos/catalogos.module.js';
 import { EmisionEcfService } from './emision-ecf.service.js';
 import { ConfiguracionEmisorEcfService } from './configuracion-emisor-ecf.service.js';
+import { ReporteDgiiService } from './reporte-dgii.service.js';
 import { FakeMiddlewareEcfAdapter } from './fake-middleware-ecf.adapter.js';
 import { MIDDLEWARE_ECF_CLIENT } from './middleware-ecf-client.token.js';
 import { EmisionEcfController, ConfiguracionEmisorEcfController } from './emision-ecf.controller.js';
+import { ReporteDgiiController } from './reporte-dgii.controller.js';
 
 /**
- * LocalizacionDoModule — emisión de e-CF de venta (ADR-0007, Sesión 4 Capa 2).
+ * LocalizacionDoModule — emisión e-CF (ADR-0007) + reportes DGII (ADR-0010).
  *
  * El middleware e-CF es un servicio externo ya existente; este módulo solo
  * provee el adaptador (`MIDDLEWARE_ECF_CLIENT`) que cumple el puerto
@@ -22,9 +24,10 @@ import { EmisionEcfController, ConfiguracionEmisorEcfController } from './emisio
   providers: [
     EmisionEcfService,
     ConfiguracionEmisorEcfService,
+    ReporteDgiiService,
     { provide: MIDDLEWARE_ECF_CLIENT, useClass: FakeMiddlewareEcfAdapter },
   ],
-  controllers: [EmisionEcfController, ConfiguracionEmisorEcfController],
-  exports: [EmisionEcfService, ConfiguracionEmisorEcfService],
+  controllers: [EmisionEcfController, ConfiguracionEmisorEcfController, ReporteDgiiController],
+  exports: [EmisionEcfService, ConfiguracionEmisorEcfService, ReporteDgiiService],
 })
 export class LocalizacionDoModule {}
