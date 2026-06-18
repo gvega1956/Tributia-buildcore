@@ -22,6 +22,7 @@ import { RequirePermission } from '../iam/decorators/require-permission.decorato
 import { PERMISSIONS } from '@tributia/core';
 import { zTerceroCreate, zTerceroUpdate } from '@tributia/catalogos';
 import type { JwtPayload } from '@tributia/core';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 
 @ApiTags('terceros')
 @ApiBearerAuth()
@@ -40,6 +41,7 @@ export class TerceroController {
   @Post()
   @RequirePermission(PERMISSIONS.TERCERO_WRITE)
   @ApiOperation({ summary: 'Crear tercero (cliente/proveedor/subcontratista/etc.)' })
+  @ApiZodBody(zTerceroCreate)
   @ApiResponse({ status: 201, description: 'Tercero creado' })
   @ApiResponse({ status: 409, description: 'RNC/Cédula duplicada en este tenant' })
   create(
@@ -62,6 +64,7 @@ export class TerceroController {
   @Put(':id')
   @RequirePermission(PERMISSIONS.TERCERO_WRITE)
   @ApiOperation({ summary: 'Actualizar tercero' })
+  @ApiZodBody(zTerceroUpdate)
   @ApiResponse({ status: 200, description: 'Tercero actualizado' })
   @ApiResponse({ status: 404, description: 'No encontrado' })
   update(

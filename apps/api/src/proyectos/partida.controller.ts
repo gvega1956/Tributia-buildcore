@@ -23,6 +23,7 @@ import {
   ApiBody,
   ApiQuery,
 } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -80,6 +81,7 @@ export class PartidaController {
   @Post()
   @RequirePermission(PERMISSIONS.EDT_WRITE)
   @ApiOperation({ summary: 'Crear capítulo, partida o sub-partida' })
+  @ApiZodBody(zPartidaCreate)
   @ApiResponse({ status: 201, description: 'Partida creada' })
   @ApiResponse({ status: 409, description: 'Código duplicado en el proyecto' })
   @ApiResponse({ status: 422, description: 'Nivel máximo excedido o datos inválidos' })
@@ -98,6 +100,7 @@ export class PartidaController {
   @Patch(':id')
   @RequirePermission(PERMISSIONS.EDT_WRITE)
   @ApiOperation({ summary: 'Actualizar datos de una partida (sin cambiar parent ni nivel)' })
+  @ApiZodBody(zPartidaUpdate)
   update(
     @Param('proyectoId') proyectoId: string,
     @Param('id') id: string,
@@ -114,6 +117,7 @@ export class PartidaController {
   @Patch(':id/reordenar')
   @RequirePermission(PERMISSIONS.EDT_WRITE)
   @ApiOperation({ summary: 'Mover partida a nueva posición dentro de sus hermanos' })
+  @ApiZodBody(zReordenarPartida)
   @ApiResponse({ status: 200, description: 'Lista de hermanos en el nuevo orden' })
   reordenar(
     @Param('proyectoId') proyectoId: string,

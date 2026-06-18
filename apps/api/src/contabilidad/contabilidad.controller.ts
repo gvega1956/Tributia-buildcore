@@ -9,6 +9,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import { z } from 'zod';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
@@ -168,6 +169,7 @@ export class ContabilidadController {
   @ApiOperation({
     summary: 'Registrar asiento manual de ajuste (contabilidad:manual). Nunca puede ser tipo operativo.',
   })
+  @ApiZodBody(zAsientoAjusteCreate)
   async registrarAjuste(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zAsientoAjusteCreate.parse(body);
 

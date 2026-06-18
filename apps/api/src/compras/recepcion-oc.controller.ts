@@ -7,6 +7,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -26,6 +27,7 @@ export class RecepcionOcController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.RECEPCION_WRITE)
   @ApiOperation({ summary: 'Crear recepción de OC en estado BORRADOR' })
+  @ApiZodBody(zRecepcionOcCreate)
   crear(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zRecepcionOcCreate.parse(body);
     return this.svc.crear(

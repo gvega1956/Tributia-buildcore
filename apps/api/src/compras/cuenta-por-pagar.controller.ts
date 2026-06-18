@@ -11,6 +11,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger'
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import { RequireAuth } from '../iam/decorators/require-auth.decorator.js';
 import { RequirePermission } from '../iam/decorators/require-permission.decorator.js';
 import { CuentaPorPagarService } from './cuenta-por-pagar.service.js';
@@ -71,6 +72,7 @@ export class AnticipoProveedorController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.ANTICIPO_WRITE)
   @ApiOperation({ summary: 'Registrar anticipo a proveedor' })
+  @ApiZodBody(zAnticipoCreate)
   registrar(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zAnticipoCreate.parse(body);
     return this.svc.registrar(req.user.tenantId, dto, req.user.sub);

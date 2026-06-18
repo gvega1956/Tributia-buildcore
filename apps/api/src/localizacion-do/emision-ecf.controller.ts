@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Param, Body, Request, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -45,6 +46,7 @@ export class EmisionEcfController {
       'Emite un e-CF de venta (31/32 desde una factura de cliente, 33/34 referenciando su e-CF de origen) ' +
       'a través del middleware de la empresa emisora — maneja contingencia (RI) automáticamente',
   })
+  @ApiZodBody(zEmisionEcfDto)
   emitir(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zEmisionEcfDto.parse(body);
     return this.svc.emitir(req.user.tenantId, dto, req.user.sub);
@@ -73,6 +75,7 @@ export class ConfiguracionEmisorEcfController {
       'Da de alta o actualiza la configuración de emisor e-CF de una empresa (RNC, razón social, ' +
       'referencia opaca a su certificado — nunca el certificado en sí)',
   })
+  @ApiZodBody(zConfiguracionEmisorDto)
   configurar(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zConfiguracionEmisorDto.parse(body);
     return this.svc.configurar(req.user.tenantId, dto, req.user.sub);
@@ -82,6 +85,7 @@ export class ConfiguracionEmisorEcfController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.ECF_EMISION_WRITE)
   @ApiOperation({ summary: 'Inicializa o actualiza el rango de NCF autorizado para un tipo de e-CF' })
+  @ApiZodBody(zInicializarSecuenciaDto)
   inicializarSecuencia(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zInicializarSecuenciaDto.parse(body);
     return this.svc.inicializarSecuencia(req.user.tenantId, dto, req.user.sub);

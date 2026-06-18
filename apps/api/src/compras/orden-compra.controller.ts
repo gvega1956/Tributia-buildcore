@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -46,6 +47,7 @@ export class OrdenCompraController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.OC_WRITE)
   @ApiOperation({ summary: 'Crear OC en estado BORRADOR' })
+  @ApiZodBody(zOrdenCompraCreate)
   create(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zOrdenCompraCreate.parse(body);
     return this.ocSvc.create(req.user.tenantId, req.user.sub, input);

@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Param, Body, Request, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -39,6 +40,7 @@ export class FacturaClienteController {
     summary:
       'Emite factura al cliente desde una cubicación — calcula retenciones por tipo de tercero y dispara el asiento contable + CxC',
   })
+  @ApiZodBody(zFacturaClienteCreateDto)
   emitir(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zFacturaClienteCreateDto.parse(body);
     return this.svc.emitir(req.user.tenantId, dto, req.user.sub);

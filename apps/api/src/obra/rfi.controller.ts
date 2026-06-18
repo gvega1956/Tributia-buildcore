@@ -9,6 +9,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -28,6 +29,7 @@ export class RfiController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.RFI_WRITE)
   @ApiOperation({ summary: 'Crear RFI (Request for Information)' })
+  @ApiZodBody(zRfiCreateDto)
   crear(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zRfiCreateDto.parse(body);
     return this.svc.crear(req.user.tenantId, dto, req.user.sub);
@@ -37,6 +39,7 @@ export class RfiController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.RFI_WRITE)
   @ApiOperation({ summary: 'Responder RFI — cambia estado a RESPONDIDO' })
+  @ApiZodBody(zRfiResponderDto)
   responder(@Param('id') id: string, @Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zRfiResponderDto.parse(body);
     return this.svc.responder(req.user.tenantId, id, dto, req.user.sub);

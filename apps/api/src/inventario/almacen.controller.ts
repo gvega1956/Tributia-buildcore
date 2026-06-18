@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -46,6 +47,7 @@ export class AlmacenController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.INVENTARIO_WRITE)
   @ApiOperation({ summary: 'Crear almacén' })
+  @ApiZodBody(zAlmacenCreate)
   create(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zAlmacenCreate.parse(body);
     return this.almacenService.create(req.user.tenantId, req.user.sub, input);
@@ -55,6 +57,7 @@ export class AlmacenController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.INVENTARIO_WRITE)
   @ApiOperation({ summary: 'Actualizar almacén' })
+  @ApiZodBody(zAlmacenUpdate)
   update(@Param('id') id: string, @Body() body: unknown, @Request() req: AuthRequest) {
     const input = zAlmacenUpdate.parse(body);
     return this.almacenService.update(req.user.tenantId, req.user.sub, id, input);
@@ -72,6 +75,7 @@ export class AlmacenController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.INVENTARIO_WRITE)
   @ApiOperation({ summary: 'Agregar ubicación a almacén' })
+  @ApiZodBody(zUbicacionCreate)
   addUbicacion(@Param('id') id: string, @Body() body: unknown, @Request() req: AuthRequest) {
     const input = zUbicacionCreate.parse(body);
     return this.almacenService.addUbicacion(req.user.tenantId, req.user.sub, id, input);

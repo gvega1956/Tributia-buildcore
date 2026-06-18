@@ -12,7 +12,8 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "test:integration": "vitest run --config vitest-integration.config.ts"
+    "test:integration": "vitest run --config vitest-integration.config.ts",
+    "generate-openapi": "tsx src/generate-openapi.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.600.0",
@@ -33,9 +34,9 @@
     "@tributia/documental": "workspace:*",
     "@tributia/importadores": "workspace:*",
     "@tributia/inventario": "workspace:*",
-    "@tributia/proyectos": "workspace:*",
     "@tributia/ledger": "workspace:*",
     "@tributia/localizacion-do": "workspace:*",
+    "@tributia/proyectos": "workspace:*",
     "@tributia/shared": "workspace:*",
     "@tributia/workflow": "workspace:*",
     "argon2": "^0.44.0",
@@ -50,7 +51,8 @@
     "pg": "^8.12.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.4.5",

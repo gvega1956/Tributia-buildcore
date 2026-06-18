@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -51,6 +52,7 @@ export class FacturaProveedorController {
     summary:
       'Registrar factura proveedor — valida e-CF, calcula match 3 vías, emite evento recepcion_factura_proveedor',
   })
+  @ApiZodBody(zFacturaProveedorCreate)
   registrar(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zFacturaProveedorCreate.parse(body);
     return this.svc.registrar(req.user.tenantId, dto, req.user.sub);

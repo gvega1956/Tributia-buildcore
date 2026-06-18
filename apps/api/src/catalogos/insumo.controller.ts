@@ -24,6 +24,7 @@ import {
   zEquivalenciaCreate,
 } from '@tributia/catalogos';
 import type { JwtPayload } from '@tributia/core';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 
 @ApiTags('insumos')
 @ApiBearerAuth()
@@ -44,6 +45,7 @@ export class InsumoController {
   @Post('unidades-medida')
   @RequirePermission(PERMISSIONS.UNIDAD_MEDIDA_WRITE)
   @ApiOperation({ summary: 'Crear unidad de medida' })
+  @ApiZodBody(zUnidadMedidaCreate)
   @ApiResponse({ status: 201 })
   @ApiResponse({ status: 409, description: 'Código duplicado' })
   createUnidad(
@@ -67,6 +69,7 @@ export class InsumoController {
   @Post('insumos')
   @RequirePermission(PERMISSIONS.INSUMO_WRITE)
   @ApiOperation({ summary: 'Crear insumo' })
+  @ApiZodBody(zInsumoCreate)
   @ApiResponse({ status: 201 })
   @ApiResponse({ status: 409, description: 'Código duplicado' })
   create(
@@ -89,6 +92,7 @@ export class InsumoController {
   @Patch('insumos/:id')
   @RequirePermission(PERMISSIONS.INSUMO_WRITE)
   @ApiOperation({ summary: 'Actualizar insumo (parcial)' })
+  @ApiZodBody(zInsumoUpdate)
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 404 })
   update(
@@ -103,6 +107,7 @@ export class InsumoController {
   @Post('insumos/:id/equivalencias')
   @RequirePermission(PERMISSIONS.INSUMO_WRITE)
   @ApiOperation({ summary: 'Añadir equivalencia de unidades al insumo' })
+  @ApiZodBody(zEquivalenciaCreate)
   @ApiResponse({ status: 201 })
   @ApiResponse({ status: 409, description: 'Equivalencia duplicada' })
   addEquivalencia(

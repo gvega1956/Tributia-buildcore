@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -60,6 +61,7 @@ export class RequisicionController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.REQUISICION_CREATE)
   @ApiOperation({ summary: 'Crear requisición (estado BORRADOR)' })
+  @ApiZodBody(zRequisicionCreate)
   create(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zRequisicionCreate.parse(body);
     return this.requisicionSvc.create(req.user.tenantId, req.user.sub, input);

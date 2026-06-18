@@ -15,6 +15,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -55,6 +56,7 @@ export class ApuController {
   @Post()
   @RequirePermission(PERMISSIONS.APU_WRITE)
   @ApiOperation({ summary: 'Crear APU para una partida' })
+  @ApiZodBody(zApuCreate)
   @ApiResponse({ status: 201, description: 'APU creado' })
   @ApiResponse({ status: 409, description: 'La partida ya tiene un APU' })
   createParaPartida(
@@ -73,6 +75,7 @@ export class ApuController {
   @Patch()
   @RequirePermission(PERMISSIONS.APU_WRITE)
   @ApiOperation({ summary: 'Actualizar metadatos del APU (nombre, descripción, unidad)' })
+  @ApiZodBody(zApuUpdate)
   updateParaPartida(
     @Param('proyectoId') proyectoId: string,
     @Param('partidaId') partidaId: string,
@@ -91,6 +94,7 @@ export class ApuController {
   @Post('lineas')
   @RequirePermission(PERMISSIONS.APU_WRITE)
   @ApiOperation({ summary: 'Añadir línea al APU (material, mano de obra, equipo o subcontrato)' })
+  @ApiZodBody(zApuLineaCreate)
   addLinea(
     @Param('proyectoId') proyectoId: string,
     @Param('partidaId') partidaId: string,
@@ -107,6 +111,7 @@ export class ApuController {
   @Patch('lineas/:lineaId')
   @RequirePermission(PERMISSIONS.APU_WRITE)
   @ApiOperation({ summary: 'Actualizar línea del APU' })
+  @ApiZodBody(zApuLineaUpdate)
   updateLinea(
     @Param('proyectoId') proyectoId: string,
     @Param('partidaId') partidaId: string,
@@ -166,6 +171,7 @@ export class ApuBibliotecaController {
   @Post()
   @RequirePermission(PERMISSIONS.APU_WRITE)
   @ApiOperation({ summary: 'Crear APU en la biblioteca (reutilizable entre proyectos)' })
+  @ApiZodBody(zApuCreate)
   create(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zApuCreate.parse(body);
     const { tenantId, sub: usuarioId } = req.user;

@@ -9,6 +9,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -34,6 +35,7 @@ export class OrdenCambioController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.ORDEN_CAMBIO_WRITE)
   @ApiOperation({ summary: 'Crear Orden de Cambio en estado BORRADOR' })
+  @ApiZodBody(zCreateOcDto)
   crear(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zCreateOcDto.parse(body);
     return this.svc.crear(req.user.tenantId, dto, req.user.sub);
@@ -43,6 +45,7 @@ export class OrdenCambioController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.ORDEN_CAMBIO_WRITE)
   @ApiOperation({ summary: 'Agregar línea de impacto a una OC BORRADOR' })
+  @ApiZodBody(zAddLineaOcDto)
   agregarLinea(@Param('id') id: string, @Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zAddLineaOcDto.parse(body);
     return this.svc.agregarLinea(req.user.tenantId, id, dto, req.user.sub);
@@ -60,6 +63,7 @@ export class OrdenCambioController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.ORDEN_CAMBIO_APPROVE)
   @ApiOperation({ summary: 'Aprobar OC — actualiza presupuesto vigente y emite evento' })
+  @ApiZodBody(zAprobarOcDto)
   aprobar(@Param('id') id: string, @Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zAprobarOcDto.parse(body);
     return this.svc.aprobar(req.user.tenantId, id, dto, req.user.sub);
@@ -69,6 +73,7 @@ export class OrdenCambioController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.ORDEN_CAMBIO_APPROVE)
   @ApiOperation({ summary: 'Rechazar OC (ENVIADO_CLIENTE → RECHAZADO)' })
+  @ApiZodBody(zRechazarOcDto)
   rechazar(@Param('id') id: string, @Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zRechazarOcDto.parse(body);
     return this.svc.rechazar(req.user.tenantId, id, dto, req.user.sub);

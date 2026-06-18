@@ -23,6 +23,7 @@ import {
   ApiBody,
   ApiQuery,
 } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -100,6 +101,7 @@ export class PresupuestoController {
     summary: 'Crear nueva versión de presupuesto',
     description: 'Con snapshotPartidas=true crea una línea por cada partida activa del proyecto.',
   })
+  @ApiZodBody(zVersionPresupuestoCreate)
   @ApiResponse({ status: 201, description: 'Versión creada' })
   createVersion(
     @Param('proyectoId') proyectoId: string,
@@ -124,6 +126,7 @@ export class PresupuestoController {
       'Una vez aprobada sus líneas son inmutables (protegido por trigger DB).',
   })
   @ApiResponse({ status: 201, description: 'Versión aprobada' })
+  @ApiZodBody(zAprobarPresupuesto)
   @ApiResponse({ status: 409, description: 'Ya existe un BASE aprobado para este proyecto' })
   @ApiResponse({ status: 422, description: 'La versión no está en estado PENDIENTE' })
   aprobar(
@@ -159,6 +162,7 @@ export class PresupuestoController {
   @Post(':versionId/lineas')
   @RequirePermission(PERMISSIONS.PRESUPUESTO_WRITE)
   @ApiOperation({ summary: 'Añadir línea a versión de presupuesto (solo BORRADOR)' })
+  @ApiZodBody(zLineaPresupuestoCreate)
   @ApiResponse({ status: 201, description: 'Línea añadida; totales recalculados' })
   @ApiResponse({ status: 409, description: 'Ya existe una línea para esa partida' })
   @ApiResponse({ status: 422, description: 'El presupuesto no está en estado PENDIENTE' })
@@ -178,6 +182,7 @@ export class PresupuestoController {
   @Patch(':versionId/lineas/:lineaId')
   @RequirePermission(PERMISSIONS.PRESUPUESTO_WRITE)
   @ApiOperation({ summary: 'Actualizar línea de presupuesto (solo versión PENDIENTE)' })
+  @ApiZodBody(zLineaPresupuestoUpdate)
   @ApiResponse({ status: 422, description: 'El presupuesto está aprobado — inmutable' })
   updateLinea(
     @Param('proyectoId') proyectoId: string,

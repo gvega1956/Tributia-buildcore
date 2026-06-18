@@ -17,6 +17,7 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import { ProyectoService } from './proyecto.service.js';
 import { RequirePermission } from '../iam/decorators/require-permission.decorator.js';
@@ -57,6 +58,7 @@ export class ProyectoController {
   @Post()
   @RequirePermission(PERMISSIONS.PROYECTO_WRITE)
   @ApiOperation({ summary: 'Crear proyecto (estado inicial: PROSPECTO)' })
+  @ApiZodBody(zProyectoCreate)
   @ApiResponse({ status: 201, description: 'Proyecto creado' })
   @ApiResponse({ status: 409, description: 'Código duplicado en esta empresa' })
   @ApiResponse({ status: 422, description: 'Tercero no tiene rol cliente' })
@@ -78,6 +80,7 @@ export class ProyectoController {
   @Put(':id')
   @RequirePermission(PERMISSIONS.PROYECTO_WRITE)
   @ApiOperation({ summary: 'Actualizar datos del proyecto' })
+  @ApiZodBody(zProyectoUpdate)
   @ApiResponse({ status: 200, description: 'Proyecto actualizado' })
   update(@Param('id') id: string, @Body() body: unknown, @Request() req: AuthReq) {
     const input = zProyectoUpdate.parse(body);
@@ -98,6 +101,7 @@ export class ProyectoController {
   @Patch(':id/estado')
   @RequirePermission(PERMISSIONS.PROYECTO_WRITE)
   @ApiOperation({ summary: 'Avanzar el estado del proyecto (máquina de estados unidireccional)' })
+  @ApiZodBody(zTransicionEstado)
   @ApiResponse({ status: 200, description: 'Estado actualizado' })
   @ApiResponse({ status: 422, description: 'Transición de estado inválida' })
   transicionarEstado(
@@ -133,6 +137,7 @@ export class ProyectoController {
   @Post(':id/equipo')
   @RequirePermission(PERMISSIONS.PROYECTO_WRITE)
   @ApiOperation({ summary: 'Asignar miembro al equipo del proyecto' })
+  @ApiZodBody(zAsignarEquipo)
   @ApiResponse({ status: 201, description: 'Miembro asignado' })
   @ApiResponse({ status: 409, description: 'Usuario ya asignado' })
   @HttpCode(HttpStatus.CREATED)

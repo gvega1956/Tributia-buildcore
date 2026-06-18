@@ -18,6 +18,7 @@ import { EquipoCatalogoService } from './equipo-catalogo.service.js';
 import { RequirePermission } from '../iam/decorators/require-permission.decorator.js';
 import { PERMISSIONS } from '@tributia/core';
 import { zEquipoCatalogoCreate, zEquipoCatalogoUpdate } from '@tributia/catalogos';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { JwtPayload } from '@tributia/core';
 
 @ApiTags('equipos-catalogo')
@@ -37,6 +38,7 @@ export class EquipoCatalogoController {
   @Post()
   @RequirePermission(PERMISSIONS.EQUIPO_CATALOGO_WRITE)
   @ApiOperation({ summary: 'Crear equipo en el catálogo' })
+  @ApiZodBody(zEquipoCatalogoCreate)
   @ApiResponse({ status: 201 })
   @ApiResponse({ status: 409, description: 'Código duplicado' })
   create(
@@ -59,6 +61,7 @@ export class EquipoCatalogoController {
   @Patch(':id')
   @RequirePermission(PERMISSIONS.EQUIPO_CATALOGO_WRITE)
   @ApiOperation({ summary: 'Actualizar equipo (parcial)' })
+  @ApiZodBody(zEquipoCatalogoUpdate)
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 404 })
   update(

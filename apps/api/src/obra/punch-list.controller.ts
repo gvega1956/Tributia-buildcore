@@ -9,6 +9,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -32,6 +33,7 @@ export class PunchListController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.RFI_WRITE)
   @ApiOperation({ summary: 'Crear ítem de punch list' })
+  @ApiZodBody(zPunchListCreateDto)
   crear(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zPunchListCreateDto.parse(body);
     return this.svc.crear(req.user.tenantId, dto, req.user.sub);
@@ -41,6 +43,7 @@ export class PunchListController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.RFI_WRITE)
   @ApiOperation({ summary: 'Actualizar estado del ítem (EN_PROGRESO, COMPLETADO, RECHAZADO)' })
+  @ApiZodBody(zPunchListActualizarEstadoDto)
   actualizarEstado(
     @Param('id') id: string,
     @Body() body: unknown,

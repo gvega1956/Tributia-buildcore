@@ -33,7 +33,6 @@ import { ContabilidadCobroRecibidoHandler } from '../../contabilidad/handlers/co
 import { CubicacionService } from '../cubicacion.service.js';
 import { FacturaClienteService } from '../factura-cliente.service.js';
 import { RetencionClienteService } from '../retencion-cliente.service.js';
-import { CuentaPorCobrarService } from '../cuenta-por-cobrar.service.js';
 import { ReporteDgiiService } from '../../localizacion-do/reporte-dgii.service.js';
 
 const ADMIN_URL =
@@ -53,7 +52,6 @@ describe('E2E — Flujo de Ingresos Completo (Capa 2 Auditoría Defecto D)', () 
 
   let cubicacionSvc: CubicacionService;
   let facturaSvc: FacturaClienteService;
-  let cxcSvc: CuentaPorCobrarService;
   let ledgerSvc: LedgerService;
   let dgiiSvc: ReporteDgiiService;
 
@@ -210,7 +208,6 @@ describe('E2E — Flujo de Ingresos Completo (Capa 2 Auditoría Defecto D)', () 
     const retencionSvc = new RetencionClienteService();
     cubicacionSvc = new CubicacionService(dbSvc);
     facturaSvc    = new FacturaClienteService(dbSvc, ledgerSvc, retencionSvc);
-    cxcSvc        = new CuentaPorCobrarService(dbSvc);
     dgiiSvc       = new ReporteDgiiService(dbSvc);
   });
 

@@ -7,6 +7,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import { TipoFlujoService } from './tipo-flujo.service.js';
 import { RequirePermission } from '../iam/decorators/require-permission.decorator.js';
@@ -31,6 +32,7 @@ export class TipoFlujoController {
   @Post()
   @RequirePermission(PERMISSIONS.FLUJO_ADMIN)
   @ApiOperation({ summary: 'Crear tipo de flujo de aprobación' })
+  @ApiZodBody(zCrearTipoFlujo)
   @ApiResponse({ status: 201 })
   crear(
     @Body() body: unknown,
@@ -52,6 +54,7 @@ export class TipoFlujoController {
   @Post(':id/pasos')
   @RequirePermission(PERMISSIONS.FLUJO_ADMIN)
   @ApiOperation({ summary: 'Añadir paso a un tipo de flujo' })
+  @ApiZodBody(zAgregarPasoFlujo)
   @ApiResponse({ status: 201 })
   @ApiResponse({ status: 404 })
   agregarPaso(

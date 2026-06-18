@@ -13,6 +13,7 @@ import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
 import { zCotizacionCreate } from '@tributia/compras';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import { RequireAuth } from '../iam/decorators/require-auth.decorator.js';
 import { RequirePermission } from '../iam/decorators/require-permission.decorator.js';
 import { CotizacionService } from './cotizacion.service.js';
@@ -54,6 +55,7 @@ export class CotizacionController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.OC_WRITE)
   @ApiOperation({ summary: 'Registrar cotización recibida de un proveedor' })
+  @ApiZodBody(zCotizacionCreate)
   registrar(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zCotizacionCreate.parse(body);
     return this.cotizacionSvc.registrar(req.user.tenantId, req.user.sub, input);

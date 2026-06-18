@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Delete, Param, Body, Query, Request } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import { z } from 'zod';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
@@ -80,6 +81,7 @@ export class FlujoCajaController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.FLUJO_CAJA_WRITE)
   @ApiOperation({ summary: 'Registra una cubicación/certificación futura planificada' })
+  @ApiZodBody(zCubicacionProyectada)
   registrar(
     @Param('proyectoId') proyectoId: string,
     @Body() body: unknown,

@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Param, Body, Request, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import { z } from 'zod';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
@@ -50,6 +51,7 @@ export class BancoController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.BANCO_WRITE)
   @ApiOperation({ summary: 'Registra una nueva cuenta bancaria' })
+  @ApiZodBody(zCrearCuenta)
   crearCuenta(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zCrearCuenta.parse(body);
     return this.bancoSvc.crearCuenta(req.user.tenantId, req.user.sub, input);
@@ -83,6 +85,7 @@ export class BancoController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.COBRO_WRITE)
   @ApiOperation({ summary: 'Registra un cobro recibido y emite evento al ledger' })
+  @ApiZodBody(zRegistrarCobro)
   registrarCobro(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zRegistrarCobro.parse(body);
     return this.cobroSvc.registrarCobro(req.user.tenantId, req.user.sub, input as Parameters<CobroService['registrarCobro']>[2]);

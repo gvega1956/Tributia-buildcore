@@ -1,5 +1,6 @@
 import { Controller, Post, Param, Body, Request } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import { z } from 'zod';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
@@ -36,6 +37,7 @@ export class ConciliacionController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.CONCILIACION_WRITE)
   @ApiOperation({ summary: 'Importa un extracto bancario (estado de cuenta)' })
+  @ApiZodBody(zImportarExtracto)
   importarExtracto(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zImportarExtracto.parse(body);
     return this.svc.importarExtracto(req.user.tenantId, req.user.sub, input);

@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Param, Body, Request, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -38,6 +39,7 @@ export class CubicacionController {
   @ApiOperation({
     summary: 'Certificar avance facturable por período (no puede superar el avance físico aprobado)',
   })
+  @ApiZodBody(zCubicacionCreateDto)
   crear(@Body() body: unknown, @Request() req: AuthRequest) {
     const dto = zCubicacionCreateDto.parse(body);
     return this.svc.crear(req.user.tenantId, dto, req.user.sub);

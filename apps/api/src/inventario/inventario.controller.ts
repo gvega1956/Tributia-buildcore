@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -76,6 +77,7 @@ export class InventarioController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.AJUSTE_INVENTARIO)
   @ApiOperation({ summary: 'Iniciar conteo físico' })
+  @ApiZodBody(zConteoFisicoCreate)
   createConteo(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zConteoFisicoCreate.parse(body);
     return this.inventarioService.createConteo(req.user.tenantId, req.user.sub, input);
@@ -85,6 +87,7 @@ export class InventarioController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.AJUSTE_INVENTARIO)
   @ApiOperation({ summary: 'Agregar línea a conteo físico' })
+  @ApiZodBody(zLineaConteoCreate)
   addLinea(
     @Param('conteoId') conteoId: string,
     @Body() body: unknown,

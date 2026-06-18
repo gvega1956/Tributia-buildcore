@@ -8,6 +8,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
 import { PERMISSIONS } from '@tributia/core';
@@ -44,6 +45,7 @@ export class SolicitudCotizacionController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.OC_WRITE)
   @ApiOperation({ summary: 'Crear SOC consolidando líneas de requisiciones aprobadas' })
+  @ApiZodBody(zSocCreate)
   create(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zSocCreate.parse(body);
     return this.socSvc.create(req.user.tenantId, req.user.sub, input);

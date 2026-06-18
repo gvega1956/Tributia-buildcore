@@ -1,5 +1,6 @@
 import { Controller, Post, Param, Body, Request } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import { z } from 'zod';
 import type { Request as ExpressRequest } from 'express';
 import type { JwtPayload } from '@tributia/core';
@@ -65,6 +66,7 @@ export class CajaChicaController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.CAJA_CHICA_WRITE)
   @ApiOperation({ summary: 'Crea un fondo de caja chica para una obra' })
+  @ApiZodBody(zCrearFondo)
   crearFondo(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zCrearFondo.parse(body);
     return this.cajaChicaSvc.crearFondo(req.user.tenantId, req.user.sub, input);
@@ -74,6 +76,7 @@ export class CajaChicaController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.CAJA_CHICA_WRITE)
   @ApiOperation({ summary: 'Registra un gasto documentado contra el fondo de caja chica' })
+  @ApiZodBody(zRegistrarGasto)
   registrarGasto(
     @Param('fondoId') fondoId: string,
     @Body() body: unknown,
@@ -90,6 +93,7 @@ export class CajaChicaController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.REPOSICION_WRITE)
   @ApiOperation({ summary: 'Solicita una reposición de caja chica (inicia flujo de aprobación)' })
+  @ApiZodBody(zSolicitarReposicion)
   solicitarReposicion(
     @Param('fondoId') fondoId: string,
     @Body() body: unknown,
@@ -117,6 +121,7 @@ export class CajaChicaController {
   @RequireAuth()
   @RequirePermission(PERMISSIONS.PAGO_PROGRAMADO_WRITE)
   @ApiOperation({ summary: 'Programa un pago a proveedor en la cola de tesorería' })
+  @ApiZodBody(zProgramarPago)
   programarPago(@Body() body: unknown, @Request() req: AuthRequest) {
     const input = zProgramarPago.parse(body);
     return this.programacionSvc.programar(req.user.tenantId, req.user.sub, input);

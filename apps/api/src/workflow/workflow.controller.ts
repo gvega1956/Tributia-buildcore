@@ -9,6 +9,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiZodBody } from '../shared/api-zod-body.decorator.js';
 import type { Request as ExpressRequest } from 'express';
 import { WorkflowService } from './workflow.service.js';
 import { RequirePermission } from '../iam/decorators/require-permission.decorator.js';
@@ -33,6 +34,7 @@ export class WorkflowController {
   @Post('instancias')
   @RequirePermission(PERMISSIONS.FLUJO_APROBAR)
   @ApiOperation({ summary: 'Iniciar flujo de aprobación para un documento' })
+  @ApiZodBody(zIniciarFlujo)
   @ApiResponse({ status: 201, description: 'Instancia de flujo creada' })
   @ApiResponse({ status: 400, description: 'No existe flujo configurado para el tipo de documento' })
   iniciar(
@@ -70,6 +72,7 @@ export class WorkflowController {
   @RequirePermission(PERMISSIONS.FLUJO_APROBAR)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Aprobar una aprobación pendiente' })
+  @ApiZodBody(zResponderAprobacion)
   @ApiResponse({ status: 200, description: 'Aprobación registrada; el flujo avanza si corresponde' })
   @ApiResponse({ status: 403, description: 'El usuario no es el aprobador asignado' })
   @ApiResponse({ status: 409, description: 'La aprobación ya fue respondida' })
@@ -88,6 +91,7 @@ export class WorkflowController {
   @RequirePermission(PERMISSIONS.FLUJO_APROBAR)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rechazar una aprobación (toda la instancia queda RECHAZADA)' })
+  @ApiZodBody(zRechazarAprobacion)
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 403 })
   @ApiResponse({ status: 409 })
@@ -106,6 +110,7 @@ export class WorkflowController {
   @RequirePermission(PERMISSIONS.FLUJO_APROBAR)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delegar una aprobación a otro usuario' })
+  @ApiZodBody(zDelegarAprobacion)
   @ApiResponse({ status: 200, description: 'Nueva aprobación creada para el delegado' })
   @ApiResponse({ status: 403, description: 'El paso no permite delegación o el usuario no es el aprobador' })
   delegar(
@@ -123,6 +128,7 @@ export class WorkflowController {
   @RequirePermission(PERMISSIONS.FLUJO_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Cancelar un flujo en progreso' })
+  @ApiZodBody(zCancelarFlujo)
   @ApiResponse({ status: 200, description: 'Flujo cancelado' })
   @ApiResponse({ status: 409, description: 'El flujo no está EN_PROGRESO' })
   cancelar(

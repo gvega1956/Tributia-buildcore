@@ -10,10 +10,14 @@
     "test": "pnpm -r build && vitest run",
     "test:watch": "vitest",
     "db:migrate": "pnpm --filter @tributia/api db:migrate",
-    "db:studio": "pnpm --filter @tributia/api db:studio"
+    "db:studio": "pnpm --filter @tributia/api db:studio",
+    "gen:api": "pnpm --filter @tributia/api generate-openapi && openapi-typescript openapi.json -o packages/api-client/src/schema.d.ts && node -e \"require('fs').unlinkSync('openapi.json')\""
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@nestjs/core", "esbuild"]
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "esbuild"
+    ]
   },
   "devDependencies": {
     "@types/node": "^20.16.1",
@@ -21,6 +25,7 @@
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
     "vitest": "^2.0.5"
