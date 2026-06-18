@@ -13,7 +13,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "test:integration": "vitest run --config vitest-integration.config.ts",
-    "generate-openapi": "tsx src/generate-openapi.ts"
+    "generate-openapi": "node node_modules/@nestjs/cli/bin/nest.js build --builder swc && node --env-file=../../.env dist/generate-openapi.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.600.0",
@@ -57,6 +57,7 @@
   "devDependencies": {
     "@nestjs/cli": "^10.4.5",
     "@nestjs/testing": "^10.4.1",
+    "@swc/cli": "^0.8.1",
     "@swc/core": "^1.15.41",
     "@types/express": "^4.17.21",
     "@types/multer": "^1.4.11",

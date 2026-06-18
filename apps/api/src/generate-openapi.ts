@@ -20,7 +20,8 @@ async function generate() {
 
   const document = SwaggerModule.createDocument(app, config);
 
-  const outPath = resolve(process.cwd(), 'openapi.json');
+  // El script corre desde apps/api/ (pnpm filter); ../../ llega a la raíz del monorepo.
+  const outPath = resolve(process.cwd(), '../../openapi.json');
   writeFileSync(outPath, JSON.stringify(document, null, 2));
 
   const routeCount = Object.keys(document.paths).length;
@@ -33,7 +34,13 @@ async function generate() {
   console.log(`  Rutas:      ${routeCount}`);
   console.log(`  Operaciones: ${operationCount}`);
 
-  await app.close();
+  // El pool de BD puede no haberse inicializado si no se procesó ningún request.
+  // Ignorar errores de limpieza — el spec ya fue escrito.
+  try {
+    await app.close();
+  } catch {
+    // noop
+  }
 }
 
 generate().catch((err) => {
