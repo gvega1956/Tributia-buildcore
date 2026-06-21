@@ -8,6 +8,13 @@ import { AuthProvider } from './lib/auth';
 import { queryClient } from './lib/query-client';
 import './index.css';
 
+window.addEventListener('error', (e) => {
+  document.body.innerHTML = `<pre style="color:red;padding:20px;white-space:pre-wrap">${e.message}\n\n${e.filename}:${e.lineno}\n\n${e.error?.stack ?? ''}</pre>`;
+});
+window.addEventListener('unhandledrejection', (e) => {
+  document.body.innerHTML = `<pre style="color:red;padding:20px;white-space:pre-wrap">Unhandled rejection:\n${String(e.reason)}\n\n${e.reason?.stack ?? ''}</pre>`;
+});
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
