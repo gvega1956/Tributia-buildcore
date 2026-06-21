@@ -30,8 +30,8 @@ export function buildClient(config: TributiaClientConfig) {
       }
       return request;
     },
-    onResponse({ response }) {
-      if (response.status === 401) {
+    onResponse({ response, request }) {
+      if (response.status === 401 && !request.url.includes('/auth/login')) {
         config.onUnauthorized?.();
       }
       return response;
