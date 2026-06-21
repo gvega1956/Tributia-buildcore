@@ -7,7 +7,15 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // Workspace packages compilados a CJS — alias directo al dist
+      // para que Vite los resuelva sin depender del hoisting de pnpm.
+      '@tributia/shared':   path.resolve(__dirname, '../../packages/shared/dist/index.js'),
+      '@tributia/ledger':   path.resolve(__dirname, '../../packages/ledger/dist/index.js'),
+      '@tributia/proyectos': path.resolve(__dirname, '../../packages/proyectos/dist/index.js'),
     },
+  },
+  optimizeDeps: {
+    include: ['@tributia/proyectos'],
   },
   server: {
     port: 3001,
