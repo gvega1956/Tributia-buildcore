@@ -4,6 +4,8 @@ import { useAuth } from './lib/auth';
 import { AppLayout } from './components/layout/app-layout';
 import { LoginPage } from './pages/login';
 import { ProyectosPage } from './pages/proyectos';
+import { ProyectoDetallePage } from './pages/proyecto-detalle';
+import { ProyectoFormPage } from './pages/proyecto-form';
 import { TablEroPage } from './pages/tablero';
 import { LoadingScreen } from './components/ui/states';
 
@@ -27,9 +29,15 @@ export default function App() {
         }
       >
         <Route index element={<Navigate to="/proyectos" replace />} />
+
+        {/* Proyectos — lista, creación, detalle y edición */}
         <Route path="/proyectos" element={<ProyectosPage />} />
+        <Route path="/proyectos/nuevo" element={<ProyectoFormPage mode="create" />} />
+        <Route path="/proyectos/:id" element={<ProyectoDetallePage />} />
+        <Route path="/proyectos/:id/editar" element={<ProyectoFormPage mode="edit" />} />
         <Route path="/proyectos/:id/tablero" element={<TablEroPage />} />
-        {/* rutas stub — se implementan en sesiones posteriores */}
+
+        {/* Rutas stub — se implementan en sesiones posteriores */}
         <Route path="/compras/*" element={<ComingSoon label="Compras" />} />
         <Route path="/inventario/*" element={<ComingSoon label="Inventario" />} />
         <Route path="/obra/*" element={<ComingSoon label="Obra" />} />

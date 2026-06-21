@@ -210,6 +210,9 @@ importers:
       '@tributia/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@tributia/proyectos':
+        specifier: workspace:*
+        version: link:../../packages/proyectos
       clsx:
         specifier: ^2.1.1
         version: 2.1.1

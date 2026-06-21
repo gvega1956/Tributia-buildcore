@@ -30,6 +30,8 @@ interface DataTableProps<TData> {
   toolbar?: ReactNode;
   /** Filas por página por defecto */
   pageSize?: number;
+  /** Callback al hacer click en una fila */
+  onRowClick?: (row: TData) => void;
 }
 
 export function DataTable<TData>({
@@ -39,6 +41,7 @@ export function DataTable<TData>({
   searchColumn,
   toolbar,
   pageSize = 20,
+  onRowClick,
 }: DataTableProps<TData>) {
   const [sorting, setSorting]               = useState<SortingState>([]);
   const [columnFilters, setColumnFilters]   = useState<ColumnFiltersState>([]);
@@ -137,8 +140,12 @@ export function DataTable<TData>({
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                    className={cn(
+                      'border-b border-gray-50 hover:bg-gray-50 transition-colors',
+                      onRowClick && 'cursor-pointer',
+                    )}
                     data-state={row.getIsSelected() ? 'selected' : undefined}
+                    onClick={onRowClick ? () => onRowClick(row.original) : undefined}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="px-4 py-3 text-gray-700">

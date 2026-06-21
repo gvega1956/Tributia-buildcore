@@ -1,132 +1,121 @@
-import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { Plus, ChevronRight, Calendar, Building2 } from 'lucide-react';
-import { getApiClient } from '@/lib/api';
-import { Card, CardContent } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Building2 } from 'lucide-react';
+import type { ColumnDef } from '@/components/ui/data-table';
+import { DataTable } from '@/components/ui/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner, ErrorState, EmptyState } from '@/components/ui/states';
+import { useProyectos, type Proyecto } from '@/hooks/use-proyectos';
+import { ESTADO_LABELS, ESTADO_BADGE, formatMoney, formatFecha } from '@/lib/proyecto-utils';
 
-interface Proyecto {
-  id: string;
-  nombre: string;
-  codigo: string;
-  estado: string;
-  tipoObra: string;
-  fechaInicioPlanificada: string | null;
-  fechaFinPlanificada: string | null;
-  descripcion: string | null;
-}
-
-const estadoBadge: Record<string, 'default' | 'info' | 'success' | 'warning' | 'danger'> = {
-  PROSPECTO:    'default',
-  LICITACION:   'info',
-  ADJUDICADO:   'info',
-  EN_EJECUCION: 'success',
-  CIERRE:       'warning',
-  GARANTIA:     'warning',
-  CERRADO:      'default',
-};
-
-const estadoLabel: Record<string, string> = {
-  PROSPECTO:    'Prospecto',
-  LICITACION:   'Licitación',
-  ADJUDICADO:   'Adjudicado',
-  EN_EJECUCION: 'En ejecución',
-  CIERRE:       'Cierre',
-  GARANTIA:     'Garantía',
-  CERRADO:      'Cerrado',
-};
-
-function useProyectosList() {
-  return useQuery({
-    queryKey: ['proyectos-list'],
-    queryFn: async () => {
-      const api = getApiClient();
-      const { data, error } = await api.GET('/api/v1/proyectos');
-      if (error) throw new Error('Error cargando proyectos');
-      return (data as Proyecto[]) ?? [];
-    },
-  });
-}
+const columns: ColumnDef<Proyecto>[] = [
+  {
+    accessorKey: 'codigo',
+    header: 'Código',
+    cell: ({ row }) => (
+      <span className="font-mono text-xs text-gray-500">{row.original.codigo}</span>
+    ),
+  },
+  {
+    accessorKey: 'nombre',
+    header: 'Nombre',
+    cell: ({ row }) => (
+      <span className="font-semibold text-gray-900">{row.original.nombre}</span>
+    ),
+  },
+  {
+    accessorKey: 'estado',
+    header: 'Estado',
+    cell: ({ row }) => (
+      <Badge variant={ESTADO_BADGE[row.original.estado]}>
+        {ESTADO_LABELS[row.original.estado]}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: 'tipoObra',
+    header: 'Tipo',
+    cell: ({ row }) => (
+      <span className="text-xs bg-gray-100 rounded px-2 py-0.5 whitespace-nowrap">
+        {row.original.tipoObra}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'montoContrato',
+    header: 'Monto contrato',
+    cell: ({ row }) => (
+      <span className="tabular-nums text-right block text-sm">
+        {formatMoney(row.original.montoContrato, row.original.monedaContrato)}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'fechaFinPlanificada',
+    header: 'Fin planificado',
+    cell: ({ row }) => (
+      <span className="text-xs text-gray-500 whitespace-nowrap">
+        {formatFecha(row.original.fechaFinPlanificada)}
+      </span>
+    ),
+  },
+];
 
 export function ProyectosPage() {
-  const { data: proyectos = [], isLoading, error, refetch } = useProyectosList();
+  const navigate = useNavigate();
+  const { data: proyectos = [], isLoading, error, refetch } = useProyectos();
+
+  if (error) {
+    return (
+      <div className="p-8">
+        <ErrorState
+          message={error instanceof Error ? error.message : 'Error cargando proyectos'}
+          onRetry={() => refetch()}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Proyectos</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            {isLoading ? '…' : `${proyectos.length} proyecto${proyectos.length !== 1 ? 's' : ''}`}
-          </p>
+          {!isLoading && (
+            <p className="text-gray-500 text-sm mt-1">
+              {proyectos.length} proyecto{proyectos.length !== 1 ? 's' : ''}
+            </p>
+          )}
         </div>
-        <Button size="md">
+        <Button onClick={() => navigate('/proyectos/nuevo')}>
           <Plus size={16} className="mr-2" />
           Nuevo proyecto
         </Button>
       </div>
 
-      {error && (
-        <ErrorState
-          message={error instanceof Error ? error.message : 'Error cargando proyectos'}
-          onRetry={() => refetch()}
-        />
-      )}
-
       {isLoading ? (
-        <LoadingSpinner />
+        <div className="flex justify-center py-16">
+          <LoadingSpinner />
+        </div>
       ) : proyectos.length === 0 ? (
         <EmptyState
           icon={<Building2 size={48} />}
           title="Sin proyectos aún"
-          description="Crea el primer proyecto para comenzar."
+          description="Crea el primer proyecto para comenzar a registrar obra."
           action={
-            <Button size="sm">
+            <Button size="sm" onClick={() => navigate('/proyectos/nuevo')}>
               <Plus size={14} className="mr-1.5" /> Nuevo proyecto
             </Button>
           }
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {proyectos.map((p) => (
-            <Link key={p.id} to={`/proyectos/${p.id}/tablero`}>
-              <Card className="h-full hover:shadow-md hover:border-brand-300 transition-all cursor-pointer group">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <Badge variant={estadoBadge[p.estado] ?? 'default'}>
-                      {estadoLabel[p.estado] ?? p.estado}
-                    </Badge>
-                    <ChevronRight
-                      size={16}
-                      className="text-gray-300 group-hover:text-brand-500 transition-colors"
-                    />
-                  </div>
-                  <p className="text-xs font-mono text-gray-400 mb-1">{p.codigo}</p>
-                  <h3 className="font-semibold text-gray-900 text-base leading-snug mb-3">
-                    {p.nombre}
-                  </h3>
-                  <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                    <span className="inline-block bg-gray-100 rounded px-2 py-0.5">{p.tipoObra}</span>
-                    {p.fechaFinPlanificada && (
-                      <>
-                        <Calendar size={12} />
-                        <span>
-                          Fin{' '}
-                          {new Date(p.fechaFinPlanificada).toLocaleDateString('es-DO', {
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <DataTable
+          columns={columns}
+          data={proyectos}
+          searchColumn="nombre"
+          searchPlaceholder="Buscar por nombre…"
+          onRowClick={(p) => navigate(`/proyectos/${p.id}`)}
+        />
       )}
     </div>
   );
