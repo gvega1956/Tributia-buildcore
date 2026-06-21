@@ -596,8 +596,86 @@ async function main(): Promise<void> {
   }
   console.log(`  ✓ ${INSUMOS_DEMO.length} insumos procesados (${insumosNuevos} nuevos)`);
 
+  // ── 9b. Terceros demo (clientes y proveedores) ─────────────────────────────
+  console.log('\n9b. Terceros demo (clientes + proveedores)');
+
+  const TERCEROS_DEMO = [
+    {
+      rncCedula: '130123456',
+      nombreComercial: 'Ministerio de Obras Públicas (MOPC)',
+      nombreLegal: 'Ministerio de Obras Públicas y Comunicaciones',
+      tipoIdentificacion: 'RNC' as const,
+      tipoContribuyente: 'PERSONA_JURIDICA' as const,
+      condicionDgii: 'NORMAL' as const,
+      esCliente: true, esProveedor: false, esSubcontratista: false,
+      esEmpleadoRelacionado: false, esBanco: false, esInstitucionEstatal: true,
+    },
+    {
+      rncCedula: '101234567',
+      nombreComercial: 'Inmobiliaria Palma Real S.A.',
+      nombreLegal: 'Inmobiliaria Palma Real S.A.',
+      tipoIdentificacion: 'RNC' as const,
+      tipoContribuyente: 'PERSONA_JURIDICA' as const,
+      condicionDgii: 'NORMAL' as const,
+      esCliente: true, esProveedor: false, esSubcontratista: false,
+      esEmpleadoRelacionado: false, esBanco: false, esInstitucionEstatal: false,
+    },
+    {
+      rncCedula: '105678901',
+      nombreComercial: 'Ferretería Nacional S.R.L.',
+      nombreLegal: 'Ferretería Nacional S.R.L.',
+      tipoIdentificacion: 'RNC' as const,
+      tipoContribuyente: 'PERSONA_JURIDICA' as const,
+      condicionDgii: 'NORMAL' as const,
+      esCliente: false, esProveedor: true, esSubcontratista: false,
+      esEmpleadoRelacionado: false, esBanco: false, esInstitucionEstatal: false,
+    },
+    {
+      rncCedula: '107890123',
+      nombreComercial: 'Cemex Dominicana S.A.',
+      nombreLegal: 'Cemex Dominicana S.A.',
+      tipoIdentificacion: 'RNC' as const,
+      tipoContribuyente: 'PERSONA_JURIDICA' as const,
+      condicionDgii: 'NORMAL' as const,
+      esCliente: false, esProveedor: true, esSubcontratista: false,
+      esEmpleadoRelacionado: false, esBanco: false, esInstitucionEstatal: false,
+    },
+  ];
+
+  for (const t of TERCEROS_DEMO) {
+    const [existing] = await db.select({ id: schema.terceros.id })
+      .from(schema.terceros)
+      .where(and(
+        eq(schema.terceros.tenantId, tenantId),
+        eq(schema.terceros.rncCedula, t.rncCedula),
+      ))
+      .limit(1);
+
+    if (!existing) {
+      await db.insert(schema.terceros).values({
+        id: newId(), tenantId,
+        tipoIdentificacion: t.tipoIdentificacion,
+        rncCedula: t.rncCedula,
+        nombreComercial: t.nombreComercial,
+        nombreLegal: t.nombreLegal,
+        tipoContribuyente: t.tipoContribuyente,
+        condicionDgii: t.condicionDgii,
+        esCliente: t.esCliente,
+        esProveedor: t.esProveedor,
+        esSubcontratista: t.esSubcontratista,
+        esEmpleadoRelacionado: t.esEmpleadoRelacionado,
+        esBanco: t.esBanco,
+        esInstitucionEstatal: t.esInstitucionEstatal,
+        createdBy: SYSTEM_USER_ID, updatedBy: SYSTEM_USER_ID,
+      });
+      console.log(`  ✓ Tercero "${t.nombreComercial}" creado`);
+    } else {
+      console.log(`  · Tercero "${t.nombreComercial}" ya existe`);
+    }
+  }
+
   // ── 10. Centro de costo + Evento + Asiento (flujo canónico §5) ─────────────
-  console.log('\n9. Flujo canónico: centro de costo → consumo_material → asiento');
+  console.log('\n10. Flujo canónico: centro de costo → consumo_material → asiento');
 
   // Centro de costo demo (para la imputación del evento)
   const CC_CODIGO = 'CC-OBRA-001';
