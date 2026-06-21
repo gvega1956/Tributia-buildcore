@@ -7,6 +7,8 @@ import { ProyectosPage } from './pages/proyectos';
 import { ProyectoDetallePage } from './pages/proyecto-detalle';
 import { ProyectoFormPage } from './pages/proyecto-form';
 import { TablEroPage } from './pages/tablero';
+import { ComprasModule } from './pages/compras/index';
+import { InventarioModule } from './pages/inventario/index';
 import { LoadingScreen } from './components/ui/states';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -30,16 +32,20 @@ export default function App() {
       >
         <Route index element={<Navigate to="/proyectos" replace />} />
 
-        {/* Proyectos — lista, creación, detalle y edición */}
+        {/* Proyectos */}
         <Route path="/proyectos" element={<ProyectosPage />} />
         <Route path="/proyectos/nuevo" element={<ProyectoFormPage mode="create" />} />
         <Route path="/proyectos/:id" element={<ProyectoDetallePage />} />
         <Route path="/proyectos/:id/editar" element={<ProyectoFormPage mode="edit" />} />
         <Route path="/proyectos/:id/tablero" element={<TablEroPage />} />
 
-        {/* Rutas stub — se implementan en sesiones posteriores */}
-        <Route path="/compras/*" element={<ComingSoon label="Compras" />} />
-        <Route path="/inventario/*" element={<ComingSoon label="Inventario" />} />
+        {/* Compras — flujo completo requisición → OC → recepción → factura → CxP */}
+        <Route path="/compras/*" element={<ComprasModule />} />
+
+        {/* Inventario — almacenes, stock, movimientos, kardex */}
+        <Route path="/inventario/*" element={<InventarioModule />} />
+
+        {/* Rutas stub pendientes de sesiones futuras */}
         <Route path="/obra/*" element={<ComingSoon label="Obra" />} />
         <Route path="/cxc/*" element={<ComingSoon label="Cuentas x cobrar" />} />
         <Route path="/tesoreria/*" element={<ComingSoon label="Tesorería" />} />

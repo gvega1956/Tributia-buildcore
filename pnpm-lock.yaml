@@ -210,6 +210,12 @@ importers:
       '@tributia/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
+      '@tributia/compras':
+        specifier: workspace:*
+        version: link:../../packages/compras
+      '@tributia/inventario':
+        specifier: workspace:*
+        version: link:../../packages/inventario
       '@tributia/proyectos':
         specifier: workspace:*
         version: link:../../packages/proyectos

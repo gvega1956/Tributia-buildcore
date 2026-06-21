@@ -85,6 +85,75 @@ export const zOrdenCompraCreate = z.object({
 export const zOrdenCompraAprobar = z.object({});
 export const zOrdenCompraEmitir = z.object({});
 
+// ─── Recepción OC ─────────────────────────────────────────────────────────────
+
+export const zRecepcionOcCreate = z.object({
+  ordenCompraId: zUUID,
+  almacenId: zUUID,
+  numero: z.string().min(1).max(30),
+  conduce: z.string().max(50).optional(),
+  fechaRecepcion: zFecha,
+  archivoConduceId: zUUID.nullable().optional(),
+  lineas: z
+    .array(
+      z.object({
+        lineaOrdenCompraId: zUUID,
+        insumoId: zUUID,
+        partidaId: zUUID,
+        cantidadRecibida: zDecimal,
+        costoUnitario: zDecimal,
+        moneda: z.enum(['DOP', 'USD', 'EUR']),
+        observacion: z.string().max(500).optional(),
+      }),
+    )
+    .min(1),
+  notas: z.string().max(1000).optional(),
+});
+
+// ─── Factura Proveedor ────────────────────────────────────────────────────────
+
+export const zFacturaProveedorCreate = z.object({
+  empresaId: zUUID,
+  terceroId: zUUID,
+  rncProveedor: z.string().min(9).max(13),
+  ordenCompraId: zUUID.nullable().optional(),
+  recepcionOcId: zUUID.nullable().optional(),
+  numero: z.string().min(1).max(30),
+  ncf: z.string().min(11).max(19),
+  fechaFactura: zFecha,
+  fechaVencimientoPago: zFecha.optional(),
+  montoSubtotal: zDecimal,
+  montoItbis: zDecimal,
+  montoTotal: zDecimal,
+  moneda: z.enum(['DOP', 'USD', 'EUR']).default('DOP'),
+  lineas: z
+    .array(
+      z.object({
+        lineaOrdenCompraId: zUUID.nullable().optional(),
+        descripcion: z.string().min(1).max(500),
+        cantidad: zDecimal,
+        precioUnitario: zDecimal,
+        itbis: zDecimal.optional(),
+        total: zDecimal,
+        moneda: z.enum(['DOP', 'USD', 'EUR']).default('DOP'),
+      }),
+    )
+    .min(1),
+  notas: z.string().max(1000).optional(),
+});
+
+// ─── Anticipo Proveedor ───────────────────────────────────────────────────────
+
+export const zAnticipoCreate = z.object({
+  empresaId: zUUID,
+  terceroId: zUUID,
+  ordenCompraId: zUUID.nullable().optional(),
+  numero: z.string().min(1).max(30),
+  montoAnticipo: zDecimal,
+  moneda: z.enum(['DOP', 'USD', 'EUR']).default('DOP'),
+  fechaPago: zFecha,
+});
+
 // ─── Exported types ───────────────────────────────────────────────────────────
 
 export type LineaRequisicionCreateInput = z.infer<typeof zLineaRequisicionCreate>;
@@ -94,3 +163,6 @@ export type LineaCotizacionCreateInput = z.infer<typeof zLineaCotizacionCreate>;
 export type CotizacionCreateInput = z.infer<typeof zCotizacionCreate>;
 export type LineaOrdenCompraCreateInput = z.infer<typeof zLineaOrdenCompraCreate>;
 export type OrdenCompraCreateInput = z.infer<typeof zOrdenCompraCreate>;
+export type RecepcionOcCreateInput = z.infer<typeof zRecepcionOcCreate>;
+export type FacturaProveedorCreateInput = z.infer<typeof zFacturaProveedorCreate>;
+export type AnticipoCreateInput = z.infer<typeof zAnticipoCreate>;

@@ -12,7 +12,7 @@ export default defineConfig({
   optimizeDeps: {
     // Workspace packages compilados a CJS — deben estar aquí explícitamente
     // para que Vite los convierta a ESM antes de servirlos al browser.
-    include: ['@tributia/api-client', '@tributia/proyectos'],
+    include: ['@tributia/api-client', '@tributia/proyectos', '@tributia/compras', '@tributia/inventario'],
   },
   server: {
     port: 3001,
