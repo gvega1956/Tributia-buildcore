@@ -9,6 +9,12 @@ import { ProyectoFormPage } from './pages/proyecto-form';
 import { TablEroPage } from './pages/tablero';
 import { ComprasModule } from './pages/compras/index';
 import { InventarioModule } from './pages/inventario/index';
+import { ObraModule } from './pages/obra/index';
+import { OrdenesCambioModule } from './pages/ordenes-cambio/index';
+import { ContabilidadModule } from './pages/contabilidad/index';
+import { CxcModule } from './pages/cxc/index';
+import { TesoreriaModule } from './pages/tesoreria/index';
+import { DashboardEjecutivoPage } from './pages/dashboard-ejecutivo';
 import { LoadingScreen } from './components/ui/states';
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -30,7 +36,8 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/proyectos" replace />} />
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardEjecutivoPage />} />
 
         {/* Proyectos */}
         <Route path="/proyectos" element={<ProyectosPage />} />
@@ -45,11 +52,17 @@ export default function App() {
         {/* Inventario — almacenes, stock, movimientos, kardex */}
         <Route path="/inventario/*" element={<InventarioModule />} />
 
-        {/* Rutas stub pendientes de sesiones futuras */}
-        <Route path="/obra/*" element={<ComingSoon label="Obra" />} />
-        <Route path="/cxc/*" element={<ComingSoon label="Cuentas x cobrar" />} />
-        <Route path="/tesoreria/*" element={<ComingSoon label="Tesorería" />} />
-        <Route path="/contabilidad/*" element={<ComingSoon label="Contabilidad" />} />
+        {/* Obra — parte diario, avance físico, RFI, punch list */}
+        <Route path="/obra/*" element={<ObraModule />} />
+
+        {/* Órdenes de Cambio — modificaciones al contrato */}
+        <Route path="/ordenes-cambio/*" element={<OrdenesCambioModule />} />
+
+        {/* Módulos Capa 2 */}
+        <Route path="/contabilidad/*" element={<ContabilidadModule />} />
+        <Route path="/cxc/*" element={<CxcModule />} />
+        <Route path="/tesoreria/*" element={<TesoreriaModule />} />
+
         <Route path="/configuracion/*" element={<ComingSoon label="Configuración" />} />
       </Route>
 
