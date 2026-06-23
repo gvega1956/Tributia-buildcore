@@ -1,9 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply text-gray-900 antialiased;
+    @apply antialiased text-slate-900;
+    background-color: #F1F5F9;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    /* Habilita variantes tipográficas de Inter para mejor legibilidad */
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
+}
+
+@layer utilities {
+  /* Números financieros: alineación tabular siempre */
+  .num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+
+  /* Elevación sutil al hacer hover — aplicar a tarjetas clickeables */
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-card-md hover:-translate-y-px;
+  }
+
+  /* Scrollbar delgado para paneles laterales */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E1 transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar         { width: 5px; height: 5px; }
+  .scrollbar-thin::-webkit-scrollbar-track   { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb   { background: #CBD5E1; border-radius: 99px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 }

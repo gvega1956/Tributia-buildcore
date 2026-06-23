@@ -1,2 +1,2 @@
 // @tributia/obra — parte diario, avance, RFI, cronograma
-export {};
+export * from './obra.types.js';

@@ -7,10 +7,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantCls = {
-  primary:     'bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-50',
-  ghost:       'bg-transparent text-gray-700 hover:bg-gray-100',
-  destructive: 'bg-red-600 text-white hover:bg-red-700',
-  outline:     'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+  primary:     'bg-gradient-to-r from-brand-500 to-brand-600 text-white shadow-brand hover:from-brand-600 hover:to-brand-700 hover:shadow-brand-md disabled:opacity-50 disabled:shadow-none',
+  ghost:       'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+  destructive: 'bg-rose-600 text-white hover:bg-rose-700 shadow-sm',
+  outline:     'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400 shadow-card',
 };
 
 const sizeCls = {
@@ -24,7 +24,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       className={cn(
-        'inline-flex items-center justify-center rounded-lg font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed',
         variantCls[variant],
         sizeCls[size],
         className,

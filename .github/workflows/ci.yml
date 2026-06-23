@@ -1,0 +1,144 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '10'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOBS
+# ─────────────────────────────────────────────────────────────────────────────
+jobs:
+
+  # ── 1. Typecheck ─────────────────────────────────────────────────────────────
+  typecheck:
+    name: Typecheck (all packages)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # dist/ está en .gitignore → los packages necesitan compilarse para que
+      # TypeScript resuelva los tipos de los workspaces (main: ./dist/index.d.ts).
+      - name: Build workspace packages
+        run: pnpm -r build
+
+      - name: Type-check all packages and apps
+        run: pnpm typecheck
+
+
+  # ── 2. Backend integration tests ─────────────────────────────────────────────
+  backend:
+    name: Backend — integration tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: tributia
+          POSTGRES_PASSWORD: tributia_dev
+          POSTGRES_DB: tributia_buildcore
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U tributia -d tributia_buildcore"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    # Variables de entorno disponibles en TODOS los steps de este job.
+    # La convención del proyecto es leer estas variables via dotenv en test-setup.ts;
+    # dotenv no sobrescribe vars ya presentes en process.env, por lo que basta con
+    # definirlas aquí y el test-setup las encontrará aunque no exista el archivo .env.
+    env:
+      # Rol dueño de tablas (bypassa RLS) — para migraciones.
+      DATABASE_URL: postgresql://tributia:tributia_dev@localhost:5432/tributia_buildcore
+      # Rol de aplicación (sujeto a RLS) — para el runtime del API y los tests de aislamiento.
+      DATABASE_URL_APP: postgresql://tributia_app:tributia_app_dev@localhost:5432/tributia_buildcore
+      JWT_SECRET: ci_jwt_secret_must_be_at_least_32_chars
+      JWT_REFRESH_SECRET: ci_jwt_refresh_secret_min_32_chars_ok
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+      NODE_ENV: test
+      # Storage: los tests que usan StorageService lo inicializan pero no suben archivos reales.
+      STORAGE_ENDPOINT: http://localhost:9000
+      STORAGE_ACCESS_KEY: minioadmin
+      STORAGE_SECRET_KEY: minioadmin
+      STORAGE_BUCKET: tributia-docs
+      # Para poder ejecutar psql sin flag -W
+      PGPASSWORD: tributia_dev
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace packages
+        run: pnpm -r build
+
+      # ── DB setup ──────────────────────────────────────────────────────────────
+      # El contenedor postgres:16-alpine arranca como superusuario 'tributia'.
+      # El rol 'tributia_app' (sujeto a RLS), la función app_tenant_id() y las
+      # extensiones pgcrypto/uuid-ossp se crean mediante el mismo script que usa
+      # docker-compose en desarrollo.  Sin este paso, RLS se bypassa (todos los
+      # tests de aislamiento pasarían con un falso positivo).
+      - name: Init DB — roles, extensiones y función RLS
+        run: psql -h localhost -U tributia -d tributia_buildcore -f tools/db/init.sql
+
+      - name: Run Drizzle migrations
+        run: pnpm --filter @tributia/api db:migrate
+
+      - name: Run integration tests
+        run: pnpm --filter @tributia/api test:integration
+
+
+  # ── 3. Frontend unit tests ────────────────────────────────────────────────────
+  frontend:
+    name: Frontend — unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Los workspace packages necesitan dist/ para que el alias @tributia/* resuelva.
+      - name: Build workspace packages
+        run: pnpm -r build
+
+      - name: Run frontend tests
+        run: pnpm --filter @tributia/web test
