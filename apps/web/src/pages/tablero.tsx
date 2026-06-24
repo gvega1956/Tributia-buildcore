@@ -104,9 +104,10 @@ function cpiVariant(cpi: string | null): 'success' | 'warning' | 'danger' | 'def
 
 function SectionHeader({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-3 mb-4">
-      <div className="h-5 w-[3px] rounded-full bg-brand-500 shrink-0" />
-      <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.12em]">{label}</h2>
+    <div className="flex items-center gap-3 mb-5">
+      <div className="h-6 w-[3px] rounded-full bg-gradient-to-b from-brand-400 to-brand-600 shrink-0 shadow-[0_0_8px_rgba(99,102,241,0.55)]" />
+      <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.13em]">{label}</h2>
+      <div className="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent" />
     </div>
   );
 }
@@ -116,12 +117,30 @@ function SectionHeader({ label }: { label: string }) {
 type KpiAccent = 'brand' | 'amber' | 'sky' | 'emerald' | 'rose' | 'slate';
 
 const ACCENT_CLS: Record<KpiAccent, string> = {
-  brand:   'border-l-brand-500 bg-brand-50/30',
-  amber:   'border-l-amber-500 bg-amber-50/40',
-  sky:     'border-l-sky-500 bg-sky-50/40',
-  emerald: 'border-l-emerald-500 bg-emerald-50/40',
-  rose:    'border-l-rose-500 bg-rose-50/40',
-  slate:   'border-l-slate-200 bg-white',
+  brand:   'border-l-brand-500   bg-gradient-to-br from-brand-50   via-brand-50/60   to-white',
+  amber:   'border-l-amber-500   bg-gradient-to-br from-amber-50   via-amber-50/60   to-white',
+  sky:     'border-l-sky-500     bg-gradient-to-br from-sky-50     via-sky-50/60     to-white',
+  emerald: 'border-l-emerald-500 bg-gradient-to-br from-emerald-50 via-emerald-50/60 to-white',
+  rose:    'border-l-rose-500    bg-gradient-to-br from-rose-50    via-rose-50/60    to-white',
+  slate:   'border-l-slate-200   bg-white',
+};
+
+const ACCENT_GLOW: Record<KpiAccent, string> = {
+  brand:   'hover:shadow-glow-brand',
+  amber:   'hover:shadow-glow-amber',
+  sky:     'hover:shadow-glow-sky',
+  emerald: 'hover:shadow-glow-emerald',
+  rose:    'hover:shadow-glow-danger',
+  slate:   'hover:shadow-card-md',
+};
+
+const ACCENT_STRIP: Record<KpiAccent, string> = {
+  brand:   'bg-gradient-to-r from-brand-400   to-brand-600',
+  amber:   'bg-gradient-to-r from-amber-400   to-amber-600',
+  sky:     'bg-gradient-to-r from-sky-400     to-sky-600',
+  emerald: 'bg-gradient-to-r from-emerald-400 to-emerald-600',
+  rose:    'bg-gradient-to-r from-rose-400    to-rose-600',
+  slate:   'bg-slate-200',
 };
 
 function KpiCard({
@@ -144,21 +163,26 @@ function KpiCard({
   return (
     <div
       className={cn(
-        'rounded-xl border-l-4 border border-slate-200 shadow-card p-5 space-y-2.5 card-hover',
+        'relative rounded-xl border-l-4 border border-slate-200/80 shadow-card p-5 space-y-3 overflow-hidden',
+        'transition-all duration-200 hover:-translate-y-0.5',
         ACCENT_CLS[accent],
+        ACCENT_GLOW[accent],
       )}
     >
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">{label}</p>
+      {/* Línea de acento inferior */}
+      <span className={cn('absolute bottom-0 inset-x-0 h-[2px] rounded-b-xl opacity-60', ACCENT_STRIP[accent])} />
+
+      <p className="text-[10px] font-bold text-slate-400/80 uppercase tracking-[0.14em]">{label}</p>
       <div className="flex items-end justify-between gap-2">
-        <p className={cn('text-4xl font-extrabold num leading-none', color ?? 'text-slate-900')}>{value}</p>
-        {trend === 'up'   && <TrendingUp   size={18} className="text-emerald-500 shrink-0 mb-1" />}
-        {trend === 'down' && <TrendingDown size={18} className="text-rose-500 shrink-0 mb-1" />}
+        <p className={cn('text-[2.75rem] font-black metric leading-none', color ?? 'text-slate-900')}>{value}</p>
+        {trend === 'up'   && <TrendingUp   size={20} className="text-emerald-500 shrink-0 mb-1" />}
+        {trend === 'down' && <TrendingDown size={20} className="text-rose-500 shrink-0 mb-1" />}
       </div>
       {sub && (
         <p className="text-xs text-slate-400 font-medium leading-tight">{sub}</p>
       )}
       {bar !== undefined && barMax !== undefined && (
-        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
           <div
             className={cn('h-full rounded-full transition-all duration-700', barColor ?? 'bg-brand-500')}
             style={{ width: `${pct}%` }}
@@ -181,16 +205,16 @@ function EvmCard({ cpi, spi, ev, ac }: {
   const spiNum = spi ? parseFloat(spi) : null;
 
   const indexBg = (v: number | null) =>
-    v == null      ? 'bg-slate-800/60' :
-    v >= 0.95      ? 'bg-emerald-950/80 border border-emerald-800/50' :
-    v >= 0.80      ? 'bg-amber-950/80 border border-amber-800/50' :
-                     'bg-rose-950/80 border border-rose-800/50';
+    v == null      ? 'bg-slate-800/40 border border-slate-700/50' :
+    v >= 0.95      ? 'bg-emerald-950/70 border border-emerald-700/40 shadow-glow-emerald' :
+    v >= 0.80      ? 'bg-amber-950/70  border border-amber-700/40  shadow-glow-warning' :
+                     'bg-rose-950/70   border border-rose-700/40   shadow-glow-danger';
 
   const indexColor = (v: number | null) =>
     v == null ? 'text-slate-500' :
-    v >= 0.95 ? 'text-emerald-300' :
-    v >= 0.80 ? 'text-amber-300' :
-               'text-rose-300';
+    v >= 0.95 ? 'text-emerald-200' :
+    v >= 0.80 ? 'text-amber-200' :
+               'text-rose-200';
 
   const indexTrend = (v: number | null) =>
     v == null ? null :
@@ -198,8 +222,8 @@ function EvmCard({ cpi, spi, ev, ac }: {
                <TrendingDown size={15} className={v >= 0.80 ? 'text-amber-400 shrink-0' : 'text-rose-400 shrink-0'} />;
 
   return (
-    <div className="bg-slate-950 rounded-xl border border-slate-800 shadow-card-lg p-5 space-y-4">
-      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em]">
+    <div className="bg-gradient-dark rounded-xl border border-slate-800/80 shadow-card-lg ring-glow-brand p-5 space-y-4">
+      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.14em]">
         Valor Ganado — EVM
       </p>
 
@@ -211,7 +235,7 @@ function EvmCard({ cpi, spi, ev, ac }: {
           </p>
           <div className="flex items-center gap-2 mb-1">
             {indexTrend(cpiNum)}
-            <span className={cn('text-3xl font-extrabold num leading-none', indexColor(cpiNum))}>
+            <span className={cn('text-[2.25rem] font-black metric leading-none', indexColor(cpiNum))}>
               {cpi ? fmt(cpi, 2) : '—'}
             </span>
           </div>
@@ -225,7 +249,7 @@ function EvmCard({ cpi, spi, ev, ac }: {
           </p>
           <div className="flex items-center gap-2 mb-1">
             {indexTrend(spiNum)}
-            <span className={cn('text-3xl font-extrabold num leading-none', indexColor(spiNum))}>
+            <span className={cn('text-[2.25rem] font-black metric leading-none', indexColor(spiNum))}>
               {spi ? fmt(spi, 2) : '—'}
             </span>
           </div>
@@ -467,8 +491,8 @@ function TriadaTable({
   const alertas = partidas.filter((p) => p.alerta !== 'VERDE');
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-card overflow-hidden">
-      <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+    <div className="bg-white rounded-xl border border-slate-200/80 shadow-card-md overflow-hidden">
+      <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50 to-white">
         <div>
           <h2 className="font-bold text-slate-900">Tríada por partida</h2>
           <p className="text-xs text-slate-400 mt-0.5">
@@ -500,16 +524,16 @@ function TriadaTable({
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[900px]">
             <thead>
-              <tr className="bg-slate-900">
-                <th className="text-left px-6 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Partida</th>
-                <th className="text-right px-4 py-3 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Vigente</th>
-                <th className="text-right px-4 py-3 text-[10px] font-bold text-amber-400 uppercase tracking-widest">Comprometido</th>
-                <th className="text-right px-4 py-3 text-[10px] font-bold text-sky-400 uppercase tracking-widest">Devengado</th>
-                <th className="text-right px-4 py-3 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Disponible</th>
-                <th className="text-right px-4 py-3 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Avance</th>
-                <th className="text-right px-4 py-3 text-[10px] font-bold text-slate-300 uppercase tracking-widest">CPI</th>
-                <th className="text-center px-4 py-3 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Estado</th>
-                <th className="px-4 py-3" />
+              <tr className="bg-gradient-to-r from-slate-950 to-slate-900">
+                <th className="text-left px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Partida</th>
+                <th className="text-right px-4 py-3.5 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Vigente</th>
+                <th className="text-right px-4 py-3.5 text-[10px] font-bold text-amber-400 uppercase tracking-widest">Comprometido</th>
+                <th className="text-right px-4 py-3.5 text-[10px] font-bold text-sky-400 uppercase tracking-widest">Devengado</th>
+                <th className="text-right px-4 py-3.5 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Disponible</th>
+                <th className="text-right px-4 py-3.5 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Avance</th>
+                <th className="text-right px-4 py-3.5 text-[10px] font-bold text-slate-300 uppercase tracking-widest">CPI</th>
+                <th className="text-center px-4 py-3.5 text-[10px] font-bold text-slate-300 uppercase tracking-widest">Estado</th>
+                <th className="px-4 py-3.5" />
               </tr>
             </thead>
             <tbody>
@@ -632,10 +656,12 @@ export function TablEroPage() {
                       '#6366F1';
 
   return (
-    <div className="min-h-full bg-slate-100">
+    <div className="min-h-full bg-[#eef0f6] bg-dots">
 
       {/* ── Barra superior oscura ───────────────────────────────────────── */}
       <div className="bg-slate-950 sticky top-0 z-20 shadow-xl">
+        {/* Línea de acento brand en el tope */}
+        <div className="h-[2px] bg-gradient-to-r from-brand-600 via-brand-400 to-brand-600" />
         <div className="max-w-screen-2xl mx-auto px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
@@ -740,36 +766,40 @@ export function TablEroPage() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
                 {/* Avance físico: donut grande */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5 space-y-4">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">
+                <div className="bg-gradient-to-br from-white to-slate-50/80 rounded-xl border border-slate-200/80 shadow-card-md p-5 space-y-4">
+                  <p className="text-[10px] font-bold text-slate-400/80 uppercase tracking-[0.14em]">
                     Avance Físico
                   </p>
 
-                  <div className="flex items-center justify-center py-2">
-                    <div className="relative flex items-center justify-center w-40 h-40">
-                      <svg viewBox="0 0 36 36" className="w-40 h-40 -rotate-90">
-                        <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f1f5f9" strokeWidth="3.2" />
+                  <div className="flex items-center justify-center py-1">
+                    <div className="relative flex items-center justify-center w-44 h-44">
+                      <svg
+                        viewBox="0 0 36 36"
+                        className="w-44 h-44 -rotate-90"
+                        style={{ filter: `drop-shadow(0 0 10px ${donutColor}55)` }}
+                      >
+                        <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e2e8f0" strokeWidth="2.8" />
                         <circle
                           cx="18" cy="18" r="15.9" fill="none"
                           stroke={donutColor}
-                          strokeWidth="3.2"
+                          strokeWidth="2.8"
                           strokeDasharray={`${(avancePct / 100) * 100} ${100 - (avancePct / 100) * 100}`}
                           strokeLinecap="round"
                           className="transition-all duration-700"
                         />
                       </svg>
                       <div className="absolute text-center">
-                        <p className="text-5xl font-black text-slate-900 num leading-none">
+                        <p className="text-6xl font-black text-slate-900 metric">
                           {fmt(tablero.avancePct, 0)}
                         </p>
-                        <p className="text-sm text-slate-400 font-bold mt-0.5">%</p>
+                        <p className="text-base text-slate-400 font-bold mt-0.5">%</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex justify-between text-xs text-slate-500 border-t border-slate-100 pt-3">
-                    <span>EV: <span className="font-bold text-slate-900 num">{fmtMoney(tablero.ev)}</span></span>
-                    <span>AC: <span className="font-bold text-slate-900 num">{fmtMoney(tablero.ac)}</span></span>
+                    <span>EV: <span className="font-bold text-slate-800 num">{fmtMoney(tablero.ev)}</span></span>
+                    <span>AC: <span className="font-bold text-slate-800 num">{fmtMoney(tablero.ac)}</span></span>
                   </div>
                 </div>
 
@@ -777,8 +807,8 @@ export function TablEroPage() {
                 <EvmCard cpi={tablero.cpi} spi={tablero.spi} ev={tablero.ev} ac={tablero.ac} />
 
                 {/* Curva S preview */}
-                <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5 space-y-3">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.12em]">
+                <div className="bg-gradient-to-br from-white to-slate-50/80 rounded-xl border border-slate-200/80 shadow-card-md p-5 space-y-3">
+                  <p className="text-[10px] font-bold text-slate-400/80 uppercase tracking-[0.14em]">
                     Curva S — Vista previa
                   </p>
                   <CurvaSChart proyectoId={id} />
@@ -787,7 +817,7 @@ export function TablEroPage() {
             </section>
 
             {/* ── S3: Curva S expandida ──────────────────────────────────── */}
-            <section className="bg-white rounded-xl border border-slate-200 shadow-card p-6 space-y-4">
+            <section className="bg-gradient-to-br from-white to-slate-50/60 rounded-xl border border-slate-200/80 shadow-card-md p-6 space-y-4">
               <div>
                 <h2 className="font-bold text-slate-900">Curva S — Programado vs. Ejecutado</h2>
                 <p className="text-xs text-slate-400 mt-0.5">
@@ -817,10 +847,10 @@ export function TablEroPage() {
                       key={p.partidaId}
                       onClick={() => setSelectedPartida(p)}
                       className={cn(
-                        'flex items-center gap-3 p-4 rounded-xl border text-left w-full transition-all hover:shadow-card-md hover:-translate-y-px',
+                        'flex items-center gap-3 p-4 rounded-xl border text-left w-full transition-all duration-200 hover:-translate-y-0.5',
                         p.alerta === 'ROJO'
-                          ? 'bg-rose-50 border-l-4 border-rose-200 border-l-rose-500 hover:border-rose-300'
-                          : 'bg-amber-50 border-l-4 border-amber-200 border-l-amber-500 hover:border-amber-300',
+                          ? 'bg-gradient-to-r from-rose-50 to-rose-50/40 border-l-4 border-rose-200 border-l-rose-500 hover:border-rose-300 hover:shadow-glow-danger'
+                          : 'bg-gradient-to-r from-amber-50 to-amber-50/40 border-l-4 border-amber-200 border-l-amber-500 hover:border-amber-300 hover:shadow-glow-warning',
                       )}
                     >
                       <AlertaIcon alerta={p.alerta} size={18} />

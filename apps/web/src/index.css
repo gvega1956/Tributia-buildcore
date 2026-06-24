@@ -4,26 +4,113 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOKENS DE DISEÑO — fuente central de verdad visual
+   Úsalos con var(--token) en CSS plano o vía las clases de utilidad abajo.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* ── Brand ──────────────────────────────────────────────────────────── */
+  --c-brand:          99 102 241;     /* indigo-500 */
+  --c-brand-dark:     79 70 229;      /* indigo-600 */
+  --c-brand-glow:     rgba(99, 102, 241, 0.28);
+
+  /* ── Estados semánticos ─────────────────────────────────────────────── */
+  --c-success:        16 185 129;     /* emerald-500 */
+  --c-warning:        245 158 11;     /* amber-500 */
+  --c-danger:         244 63 94;      /* rose-500 */
+  --c-info:           14 165 233;     /* sky-500 */
+
+  /* ── Superficies / fondos ──────────────────────────────────────────── */
+  --surface-0:        #FFFFFF;
+  --surface-1:        #F8FAFC;        /* slate-50 */
+  --surface-dash:     #EEF0F6;        /* fondo dashboard */
+  --surface-dark:     #020617;        /* slate-950 */
+
+  /* ── Elevación ──────────────────────────────────────────────────────── */
+  --shadow-card:      0 1px 3px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-card-md:   0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+  --shadow-card-lg:   0 8px 24px rgba(0,0,0,.10), 0 4px 8px rgba(0,0,0,.05);
+
+  /* ── Glow semántico ─────────────────────────────────────────────────── */
+  --glow-brand:       0 0 24px rgba(99,102,241,0.25),  0 4px 12px rgba(0,0,0,.06);
+  --glow-success:     0 0 20px rgba(16,185,129,0.22),  0 4px 12px rgba(0,0,0,.06);
+  --glow-warning:     0 0 20px rgba(245,158,11,0.22),  0 4px 12px rgba(0,0,0,.06);
+  --glow-danger:      0 0 20px rgba(244,63,94,0.22),   0 4px 12px rgba(0,0,0,.06);
+
+  /* ── Tipografía ─────────────────────────────────────────────────────── */
+  --tracking-metric:  -0.035em;       /* grandes métricas financieras */
+  --tracking-label:    0.10em;        /* etiquetas en mayúsculas */
+  --lh-metric:         1;             /* line-height para KPIs */
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
 @layer base {
   body {
     @apply antialiased text-slate-900;
-    background-color: #F1F5F9;
+    background-color: var(--surface-dash);
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    /* Habilita variantes tipográficas de Inter para mejor legibilidad */
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 }
 
+/* ── Utilidades ───────────────────────────────────────────────────────────── */
 @layer utilities {
-  /* Números financieros: alineación tabular siempre */
+
+  /* Números financieros en tabla — alineación tabular */
   .num {
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum';
   }
 
-  /* Elevación sutil al hacer hover — aplicar a tarjetas clickeables */
+  /* Métricas grandes de KPI — tabular + tracking negativo + línea compacta */
+  .metric {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum', 'cv02', 'ss01';
+    letter-spacing: var(--tracking-metric);
+    line-height: var(--lh-metric);
+  }
+
+  /* Elevación al hover para tarjetas clickeables */
   .card-hover {
     @apply transition-all duration-200 hover:shadow-card-md hover:-translate-y-px;
+  }
+
+  /* Versión más dramática para elementos hero */
+  .card-hover-strong {
+    @apply transition-all duration-200 hover:shadow-card-lg hover:-translate-y-[3px];
+  }
+
+  /* Fondo con dot-grid sutil para dashboards */
+  .bg-dots {
+    background-image: radial-gradient(circle, #c4cde0 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* Overlay mesh-gradient para añadir profundidad al fondo */
+  .bg-mesh {
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99,102,241,0.06), transparent),
+      radial-gradient(circle, #c4cde0 1px, transparent 1px);
+    background-size: 100% 100%, 22px 22px;
+  }
+
+  /* Texto con gradiente brand — para títulos y valores destacados */
+  .text-gradient-brand {
+    @apply text-transparent bg-clip-text;
+    background-image: linear-gradient(135deg, #818CF8 0%, #6366F1 50%, #4F46E5 100%);
+  }
+
+  /* Sombras de glow semántico — complementan los shadow-glow-* de Tailwind */
+  .shadow-glow-brand   { box-shadow: var(--glow-brand);   }
+  .shadow-glow-success { box-shadow: var(--glow-success);  }
+  .shadow-glow-warning { box-shadow: var(--glow-warning);  }
+  .shadow-glow-danger  { box-shadow: var(--glow-danger);   }
+
+  /* Ring de glow para foco o estados activos en dark cards */
+  .ring-glow-brand {
+    box-shadow:
+      0 0 0 1px rgba(99,102,241,0.30),
+      0 0 16px rgba(99,102,241,0.18);
   }
 
   /* Scrollbar delgado para paneles laterales */
