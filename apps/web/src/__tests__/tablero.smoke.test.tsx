@@ -87,14 +87,14 @@ describe('TablEroPage — smoke tests', () => {
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as ReturnType<typeof useCurvaS>);
+    } as unknown as ReturnType<typeof useCurvaS>);
 
     vi.mocked(useTrazabilidad).mockReturnValue({
       data: [],
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as ReturnType<typeof useTrazabilidad>);
+    } as unknown as ReturnType<typeof useTrazabilidad>);
   });
 
   it('renderiza las cuatro tarjetas KPI cuando el tablero tiene datos', () => {
@@ -103,7 +103,7 @@ describe('TablEroPage — smoke tests', () => {
       isLoading: false,
       error: null,
       refetch: vi.fn(),
-    } as ReturnType<typeof useTablero>);
+    } as unknown as ReturnType<typeof useTablero>);
 
     renderTablEro();
 
@@ -121,7 +121,7 @@ describe('TablEroPage — smoke tests', () => {
       isLoading: true,
       error: null,
       refetch: vi.fn(),
-    } as ReturnType<typeof useTablero>);
+    } as unknown as ReturnType<typeof useTablero>);
 
     renderTablEro();
 

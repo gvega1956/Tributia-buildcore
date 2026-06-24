@@ -119,6 +119,11 @@ export const PERMISSIONS = {
   FLUJO_CAJA_READ: 'flujo_caja:read',
   FLUJO_CAJA_WRITE: 'flujo_caja:write',
 
+  // Generación de PDF (documentos imprimibles)
+  OC_PDF: 'oc:pdf',
+  CUBICACION_PDF: 'cubicacion:pdf',
+  FACTURA_CLI_PDF: 'factura_cli:pdf',
+
   // Reportes DGII (§17)
   REPORTE_DGII_READ: 'reporte_dgii:read',
 

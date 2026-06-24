@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Trash2, FileCheck } from 'lucide-react';
+import { Plus, Trash2, FileCheck, FileDown } from 'lucide-react';
 import { zCubicacionCreate, type CubicacionCreateInput } from '@tributia/cxc';
 import { useCubicaciones, useCreateCubicacion, type Cubicacion } from '@/hooks/use-cxc';
 import { useProyectos } from '@/hooks/use-proyectos';
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner, ErrorState, EmptyState } from '@/components/ui/states';
 import { toast } from '@/components/ui/toast';
 import Decimal from 'decimal.js';
+import { useDescargarCubicacionPdf } from '@/hooks/use-documentos-pdf';
 
 const ESTADO_BADGE: Record<string, 'default' | 'info' | 'success' | 'danger'> = {
   BORRADOR: 'default',
@@ -75,7 +76,8 @@ export function CubicacionesPage() {
 
   const { data: cubicaciones = [], isLoading, error, refetch } = useCubicaciones(proyectoFiltro || undefined);
   const { data: proyectos = [] } = useProyectos();
-  const crearMut = useCreateCubicacion();
+  const crearMut  = useCreateCubicacion();
+  const pdfMut    = useDescargarCubicacionPdf();
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<CubicacionCreateInput>({
     resolver: zodResolver(zCubicacionCreate),
@@ -161,6 +163,18 @@ export function CubicacionesPage() {
               </tbody>
             </table>
           </div>
+          <ModalFooter>
+            <Button variant="outline" onClick={() => setSelected(null)}>Cerrar</Button>
+            <Button
+              variant="outline"
+              aria-label="Descargar PDF cubicación"
+              onClick={() => void pdfMut.descargar(selected.id)}
+              disabled={pdfMut.isPending}
+            >
+              <FileDown size={14} className="mr-1.5" />
+              {pdfMut.isPending ? 'Generando…' : 'Descargar PDF'}
+            </Button>
+          </ModalFooter>
         </Modal>
       )}
 

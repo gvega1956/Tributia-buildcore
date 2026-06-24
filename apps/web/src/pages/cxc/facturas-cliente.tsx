@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Send } from 'lucide-react';
+import { Plus, Send, FileDown } from 'lucide-react';
 import { zFacturaClienteCreate, type FacturaClienteCreateInput } from '@tributia/cxc';
 import { useFacturasCliente, useEmitirFactura, type FacturaCliente } from '@/hooks/use-cxc';
 import { useProyectos } from '@/hooks/use-proyectos';
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner, ErrorState, EmptyState } from '@/components/ui/states';
 import { toast } from '@/components/ui/toast';
 import Decimal from 'decimal.js';
+import { useDescargarFacturaClientePdf } from '@/hooks/use-documentos-pdf';
 
 const ESTADO_BADGE: Record<string, 'default' | 'info' | 'success' | 'danger'> = {
   EMITIDA: 'info',
@@ -90,6 +91,7 @@ export function FacturasClientePage() {
   const { data: facturas = [], isLoading, error, refetch } = useFacturasCliente(proyectoFiltro || undefined);
   const { data: proyectos = [] } = useProyectos();
   const emitirMut = useEmitirFactura();
+  const pdfMut    = useDescargarFacturaClientePdf();
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FacturaClienteCreateInput>({
     resolver: zodResolver(zFacturaClienteCreate),
@@ -169,6 +171,18 @@ export function FacturasClientePage() {
               <span className="font-semibold">e-CF:</span> La emisión fiscal requiere conexión con el middleware DGII — pendiente de configuración. Ver endpoint <span className="font-mono">/api/v1/localizacion-do/emitir</span>.
             </div>
           </div>
+          <ModalFooter>
+            <Button variant="outline" onClick={() => setSelected(null)}>Cerrar</Button>
+            <Button
+              variant="outline"
+              aria-label="Descargar PDF factura"
+              onClick={() => void pdfMut.descargar(selected.id)}
+              disabled={pdfMut.isPending}
+            >
+              <FileDown size={14} className="mr-1.5" />
+              {pdfMut.isPending ? 'Generando…' : 'Descargar PDF'}
+            </Button>
+          </ModalFooter>
         </Modal>
       )}
 

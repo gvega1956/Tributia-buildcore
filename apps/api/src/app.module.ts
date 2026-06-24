@@ -24,6 +24,7 @@ import { ContabilidadModule } from './contabilidad/contabilidad.module.js';
 import { CxcModule } from './cxc/cxc.module.js';
 import { TesoreriaModule } from './tesoreria/tesoreria.module.js';
 import { LocalizacionDoModule } from './localizacion-do/localizacion-do.module.js';
+import { DocumentosPdfModule } from './documentos-pdf/documentos-pdf.module.js';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { LocalizacionDoModule } from './localizacion-do/localizacion-do.module.j
     CxcModule,
     TesoreriaModule,
     LocalizacionDoModule,
+    DocumentosPdfModule,
     HealthModule,
   ],
   providers: [

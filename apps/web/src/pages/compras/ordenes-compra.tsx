@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Trash2, CheckCircle, Zap } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Zap, FileDown } from 'lucide-react';
 import { zOrdenCompraCreate, type OrdenCompraCreateInput } from '@tributia/compras';
 import {
   useOrdenesCompra,
@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { LoadingSpinner, ErrorState, EmptyState } from '@/components/ui/states';
 import { toast } from '@/components/ui/toast';
+import { useDescargarOrdenCompraPdf } from '@/hooks/use-documentos-pdf';
 
 const ESTADO_BADGE: Record<EstadoOrdenCompra, 'default' | 'warning' | 'info' | 'success' | 'danger'> = {
   BORRADOR: 'default',
@@ -57,7 +58,8 @@ export function OrdenesCompraPage() {
   const [showForm, setShowForm] = useState(false);
 
   const { data: ordenes = [], isLoading, error, refetch } = useOrdenesCompra();
-  const crearMut = useCreateOrdenCompra();
+  const crearMut    = useCreateOrdenCompra();
+  const pdfMut      = useDescargarOrdenCompraPdf();
   const aprobarMut = useAprobarOrdenCompra();
   const emitirMut = useEmitirOrdenCompra();
 
@@ -166,6 +168,16 @@ export function OrdenesCompraPage() {
                 Emitir
               </Button>
             )}
+            <Button
+              size="sm"
+              variant="outline"
+              aria-label="Descargar PDF"
+              onClick={(e) => { e.stopPropagation(); void pdfMut.descargar(oc.id); }}
+              disabled={pdfMut.isPending}
+            >
+              <FileDown size={12} className="mr-1" />
+              PDF
+            </Button>
           </div>
         );
       },

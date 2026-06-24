@@ -104,22 +104,22 @@ function renderDashboard() {
 function mockAllLoaded() {
   vi.mocked(useKPIsCartera).mockReturnValue({
     data: KPIS_OK, isLoading: false, error: null, refetch: vi.fn(),
-  } as ReturnType<typeof useKPIsCartera>);
+  } as unknown as ReturnType<typeof useKPIsCartera>);
 
   vi.mocked(useSaludProyectos).mockReturnValue({
     data: SALUD_OK, isLoading: false, error: null, refetch: vi.fn(),
-  } as ReturnType<typeof useSaludProyectos>);
+  } as unknown as ReturnType<typeof useSaludProyectos>);
 
   vi.mocked(useFeedActividad).mockReturnValue({
     data: ACTIVIDAD_OK, isLoading: false, error: null, refetch: vi.fn(),
-  } as ReturnType<typeof useFeedActividad>);
+  } as unknown as ReturnType<typeof useFeedActividad>);
 }
 
 function mockAllLoading() {
   const stub = { data: undefined, isLoading: true, error: null, refetch: vi.fn() };
-  vi.mocked(useKPIsCartera).mockReturnValue(stub    as ReturnType<typeof useKPIsCartera>);
-  vi.mocked(useSaludProyectos).mockReturnValue(stub as ReturnType<typeof useSaludProyectos>);
-  vi.mocked(useFeedActividad).mockReturnValue(stub  as ReturnType<typeof useFeedActividad>);
+  vi.mocked(useKPIsCartera).mockReturnValue(stub    as unknown as ReturnType<typeof useKPIsCartera>);
+  vi.mocked(useSaludProyectos).mockReturnValue(stub as unknown as ReturnType<typeof useSaludProyectos>);
+  vi.mocked(useFeedActividad).mockReturnValue(stub  as unknown as ReturnType<typeof useFeedActividad>);
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
